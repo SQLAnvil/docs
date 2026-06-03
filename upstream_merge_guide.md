@@ -4,6 +4,14 @@ This guide outlines a highly robust, sandboxed process for pulling, merging, and
 
 ---
 
+## 0. Last Sync & The One Key Principle
+
+**Last synced:** upstream **`3.0.59`** → `main` on 2026-06-03 (merge commit `dfeb1e5d`). The local `dataform` branch mirrors the upstream release tag; each sync advances `main`'s merge-base with upstream, so the next merge only sees *new* commits.
+
+> **The #1 lesson: the Bazel build — not grep — is the source of truth for rename leftovers.** Git auto-merges most upstream changes cleanly, but those auto-merged regions carry upstream `dataform.` / `df/` / `@dataform/` / `__dataform_*` tokens that produce **no conflict markers** yet still break the renamed fork. `tsc` (via Bazel) flags every one. Grep is unreliable here: macOS BSD grep silently no-ops on `\bword\b` and on `-r` given an explicit file list. **Finish every sync by building, fixing what tsc reports, and rebuilding — never trust a clean grep alone.**
+
+---
+
 ## 1. Upstream Sync Process Architecture
 
 To ensure your primary local `main` branch remains 100% stable during the merge, **always perform the merge inside a temporary sandbox branch** before merging back into `main`.
@@ -88,15 +96,32 @@ import { ActionBuilder } from "sa/core/actions/base";
 * **Resolution:**
   - Globally replace the merged references to use `sqlanvil.` instead of `dataform.`.
 
+### D. Conflict Type: Auto-merged regions reintroduce `dataform` tokens (the silent one)
+**Not a git conflict.** Upstream code that auto-merges cleanly — new helper bodies, new test cases, files upstream rewrote wholesale — arrives carrying `dataform.X`, `df/…` imports, `@dataform/*`, or `__dataform_current_file`. No conflict markers, but it compile-breaks the fork.
+* **Resolution:**
+  - After resolving the *visible* conflicts, build and rename every token `tsc` reports:
+    `./scripts/docker-bazel build //core/... //cli/... //protos/... --jobs=2 --local_ram_resources=2048`
+  - When upstream **rewrote a whole file's apparatus** (e.g. `cli/vm/compile.ts` caller-file machinery in 3.0.59), don't resolve hunk-by-hunk — `git checkout --theirs <file>`, then re-apply the rename. Piecemeal resolution leaves auto-merged code referencing variables only the upstream side defines (e.g. `coreBundlePath`, `needsCallerFileShim`).
+
+### E. Specific landmines seen in the 3.0.59 sync
+- **Caller-file global:** the exposed sandbox global must stay `__sqlanvil_current_file` (read by `core/utils.ts`); rename upstream's `__dataform_current_file` to it. `__df_enter/__df_exit/__df_current` are internal helper names — fine to leave.
+- **`dataform.json` clean break:** never reintroduce the `hasDataformJson` / `global.dataformJson` handling upstream adds — SQLAnvil reads only `workflow_settings.yaml`.
+- **Extracted helpers:** when upstream moves logic into helpers (e.g. `executionSql.createTableTasks/Operation/Assertion`), the rename must follow into the auto-merged helper bodies; prior SQLAnvil behavior (e.g. `disabled`-action handling) is usually preserved *inside* them — verify rather than re-add.
+- **CLI install-path tests:** upstream tests that `npm i @dataform/core@<ver>` become `@sqlanvil/core@<ver>` (unpublished) — they compile but fail at runtime. Skip or adapt; don't let them block the sync.
+- **`df_` in generated SQL / test fixtures:** watch for non-namespace leftovers like `df_osc_`, `_df_temp_`, `df_integration_test` → rename to `sa_`. Casing artifacts too (`readsqlanvil…` → `readSqlanvil…`).
+
 ---
 
 ## 4. Verification & Clean-Up
 
-Once all conflicts are resolved, run the full validation suite inside your development container:
+Once all conflicts are resolved, run the full validation suite inside your development container. **Native macOS Bazel is broken** (the `wrapped_clang` / dyld `LC_UUID` toolchain error compiling protobuf C++), so all builds/tests go through `scripts/docker-bazel`. Always pass `--jobs=2 --local_ram_resources=2048` — the in-container Bazel JVM gets OOM-killed (`Socket closed`, error 14) under default parallelism during webpack bundling.
 
 ```bash
-# 1. Run core compiler tests
-./scripts/docker-bazel test //core/...
+# 1. Build everything affected — THIS is what catches reintroduced dataform tokens
+./scripts/docker-bazel build //core/... //cli/... //protos/... --jobs=2 --local_ram_resources=2048
+
+# 2. Run core compiler tests
+./scripts/docker-bazel test //core/... --jobs=2 --local_ram_resources=2048
 
 # 2. Run the newly updated integration tests
 PG_HOST=host.docker.internal PG_PORT=5432 ./scripts/docker-bazel test //tests/integration:postgres.spec --test_env=PG_HOST --test_env=PG_PORT --test_env=PG_USER --test_env=PG_PASSWORD --test_env=PG_DATABASE
