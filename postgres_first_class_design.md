@@ -37,7 +37,17 @@ SupabaseDbAdapter extends PostgresDbAdapter   (supabase)
         (project_ref + service_role_key OR direct DB url + service_role for RLS bypass)
 ```
 
-Both adapters live under `cli/api/dbadapters/`. SQL generators live under `core/compilation_sql/postgres/` and `core/compilation_sql/supabase/`.
+Both adapters live under `cli/api/dbadapters/`.
+
+> **As-built (supersedes the original plan):** execution-time SQL generation (the `create table`,
+> indexes, partitioning, upserts, materialized views, etc. emitted at run time) lives in
+> `cli/api/dbadapters/<warehouse>_execution_sql.ts` — `postgres_execution_sql.ts` and
+> `supabase_execution_sql.ts` (Supabase extends Postgres) implementing the `IExecutionSql`
+> interface, **parallel to the existing `bigquery_execution_sql.ts`**. They are *not* under
+> `core/compilation_sql/postgres/`. `core/compilation_sql/` keeps only compile-time,
+> warehouse-agnostic SQL (target resolution, inline-assertion SQL). This placement keeps each
+> warehouse's execution SQL co-located with the adapter that runs it and matches the established
+> BigQuery layout.
 
 ### 2.1 `IDbAdapter` Surface
 
@@ -215,9 +225,11 @@ Phases 1-2 (deps + relocation) from the Antigravity doc stand as written. The re
 - Credential format: standard `{ host, port, database, user, password, ssl }` (or DSN string). Separate from BigQuery's `{ projectId, credentials, location }`.
 
 ### Phase 3b — Postgres SQL generator (2-3 days)
-- New directory: `core/compilation_sql/postgres/`.
-- One generator per action type (table, view, incremental, materialized view, operation, assertion, declaration).
-- Tests: `core/compilation_sql/postgres/*_test.ts`. Snapshot output against expected idiomatic Postgres SQL.
+- **As-built:** implemented in `cli/api/dbadapters/postgres_execution_sql.ts` (implements
+  `IExecutionSql`, parallel to `bigquery_execution_sql.ts`), **not** a new
+  `core/compilation_sql/postgres/` directory. See the as-built note in §2.
+- One code path per action type (table, view, incremental, materialized view, operation, assertion, declaration).
+- Tests: unit in `cli/api/execution_sql_test.ts`; integration in `tests/integration/postgres.spec.ts` against live Postgres.
 
 ### Phase 3c — Action config schema additions (1 day)
 - Add `PostgresOptions` and `SupabaseOptions` to `protos/configs.proto`.
