@@ -63,3 +63,31 @@ each item has notes so it can be picked up later without re-deriving context.
   (`host/port/database/user/password/sslMode/defaultSchema`); offer to test the connection
   (the CLI already has a credentials test path).
 - Ties into design doc Phase 4 ("`sqlanvil init` templates for both new warehouses").
+
+## 5. `--environment` (named environments)
+
+- [ ] Add a first-class **`--environment <name>`** concept for dev/staging/prod isolation.
+- **What already exists (the primitive, don't rebuild it):** `--schema-suffix <name>` (and
+  `datasetSuffix:` in `workflow_settings.yaml`) already produce dynamic datasets. The suffix is
+  applied **in core at compile time** — `session.ts` appends `_<suffix>` to every action's
+  `target.schema` before any adapter runs — so it **already works for Postgres/Supabase** (the
+  adapter just reads `target.schema`). `--vars` overrides flow the same way, via
+  `constructProjectConfigOverride` → `projectConfigOverride` (`cli/index.ts`). What's missing is
+  the ergonomic, named layer on top.
+- **The new feature:** `--environment` is the name that actually makes sense (more intuitive than
+  `--schema-suffix`). Two possible scopes:
+  - **A — thin alias:** `--environment <name>` simply sets `schemaSuffix = <name>`. A few lines in
+    the CLI option layer; delivers exactly "append the environment to the schema". Good stopgap.
+  - **B — real environments (preferred):** an `environments.json` (or `environments:` block in
+    `workflow_settings.yaml`) defining named environments, each carrying its own `schemaSuffix`,
+    `vars`, and — the real reason environments exist — **its own credentials / database**
+    (prod vs staging usually differ by more than a schema suffix); optionally a git ref.
+    `--environment staging` loads that env and applies its overrides (config override + credential
+    selection).
+- **Implementation pointers:** CLI flag → merge env overrides into the existing
+  `projectConfigOverride` plumbing; per-env credentials means selecting the credentials file/profile
+  by environment (today `--credentials` is a single path). Keep `--schema-suffix` as the documented
+  low-level primitive (and possibly make `--environment` an alias that also sets it).
+- **Decision to make:** ship A first as a stopgap, or go straight to B. Where do environments live —
+  separate `environments.json` (Dataform's legacy location) or a block in `workflow_settings.yaml`
+  (more consistent with the rest of sqlanvil config)?
