@@ -39,15 +39,18 @@ connection options. **Which one you use matters:**
 | Option | Host / Port | User | Use when |
 | :--- | :--- | :--- | :--- |
 | **Direct connection** | `db.<ref>.supabase.co` : `5432` | `postgres` | Your network has **IPv6** (Supabase direct connections are IPv6-only unless you've bought the IPv4 add-on). |
-| **Session pooler** | `aws-0-<region>.pooler.supabase.com` : `5432` | `postgres.<ref>` | **IPv4** networks (most laptops, most Docker containers, most CI). Recommended default. |
-| Transaction pooler | `aws-0-<region>.pooler.supabase.com` : `6543` | `postgres.<ref>` | Serverless/edge only. **Not recommended for SQLAnvil** — transaction mode doesn't support all session/DDL features. |
+| **Session pooler** | `aws-<n>-<region>.pooler.supabase.com` : `5432` | `postgres.<ref>` | **IPv4** networks (most laptops, most Docker containers, most CI). Recommended default. |
+| Transaction pooler | `aws-<n>-<region>.pooler.supabase.com` : `6543` | `postgres.<ref>` | Serverless/edge only. **Not recommended for SQLAnvil** — transaction mode doesn't support all session/DDL features. |
 
 **Rule of thumb:** if you're not sure your network has IPv6 (you probably don't), use the **Session
 pooler** (port 5432). SQLAnvil runs schema DDL, so prefer **session** mode over transaction mode.
 
 Two things the dashboard gives you that you'll need:
-- The exact **host / port / user** — copy them verbatim from the Connect dialog (the pooler `user`
-  is `postgres.<your-project-ref>`, not just `postgres`).
+- The exact **host / port / user** — **copy them verbatim from the Connect dialog; don't build the
+  host by hand.** The pooler host prefix (`aws-0-` vs `aws-1-` — new projects are usually `aws-1-`)
+  and the region slug vary per project; a constructed host connects to the *wrong* regional pooler
+  and fails with `tenant ... not found`. The pooler `user` is `postgres.<your-project-ref>` (not
+  just `postgres`).
 - Your **database password** — set when you created the project (Settings → Database → reset if
   you've lost it). The Supabase CLI does **not** expose this.
 
@@ -120,7 +123,7 @@ select * from sqlanvil.hello;
 | Symptom | Likely cause | Fix |
 | :--- | :--- | :--- |
 | Connection times out / `ENETUNREACH` / can't reach host | Using the **direct** host on an **IPv4** network (it's IPv6-only) | Switch to the **Session pooler** (port 5432, host `aws-0-<region>.pooler.supabase.com`, user `postgres.<ref>`). |
-| `Tenant or user not found` | Pooler requires the qualified username | Set `user` to `postgres.<your-project-ref>`, not `postgres`. |
+| `tenant ... not found` / `Tenant or user not found` | Wrong pooler **host** (you reached a different region's pooler), or a non-qualified username | Copy the **host verbatim** from the Connect dialog (the `aws-0-`/`aws-1-` prefix + region slug aren't guessable), and set `user` to `postgres.<your-project-ref>`. |
 | `no pg_hba.conf entry ... no encryption` / SSL errors | SSL not requested | Set `"sslMode": "require"`. |
 | `password authentication failed` | Wrong DB password | Reset it in Settings → Database; the CLI can't supply it. |
 | `Unexpected property "//"` (or JSON parse error) | Comment keys / trailing comma in the credentials file | `.df-credentials.json` is strict JSON — remove them. |
