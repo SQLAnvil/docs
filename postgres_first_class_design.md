@@ -279,9 +279,46 @@ Recommended sequencing: **rename first, in a single sweep PR on the `restore-pos
 
 `sqlanvil-com/index.html` should also gain a one-line legal notice acknowledging the fork's origin per Apache 2.0 license terms (Dataform OSS is Apache-2.0; attribution is required, derivative naming is not — but credit upstream cleanly).
 
-### 8.2 Connection config is nested under `warehouse:` block
+### 8.2 Connection config: flat `warehouse:` setting + separate credentials file
 
-Decision: **nested**. Shape:
+**Decision (revised — supersedes the original "nested" proposal shown below): FLAT.**
+
+`workflow_settings.yaml` carries only the non-secret `warehouse:` string plus defaults; the
+connection (with secrets) lives in a gitignored `.df-credentials.json` (the strict
+`PostgresConnection` shape):
+
+```yaml
+# workflow_settings.yaml
+warehouse: postgres            # bigquery | postgres | supabase (validated; unknown values rejected)
+defaultDataset: analytics      # Postgres schema / BigQuery dataset
+defaultAssertionDataset: analytics_assertions
+sqlanvilCoreVersion: 3.0.59
+```
+```json
+// .df-credentials.json (gitignored)
+{ "host": "...", "port": 5432, "database": "...", "user": "...",
+  "password": "...", "sslMode": "require", "defaultSchema": "public" }
+```
+
+Why flat + separate credentials wins (overturning the original nested decision):
+
+- **Secret hygiene.** The nested form put `host`/`user`/`password` (even env-interpolated) in the
+  committed `workflow_settings.yaml`. Keeping the connection in a gitignored `.df-credentials.json`
+  keeps secrets out of version control entirely.
+- **Upstream convention.** Dataform separates `workflow_settings.yaml` (settings) from
+  `.df-credentials.json` (connection); matching it keeps upstream merges clean.
+- **Already shipped.** The CLI parser, `init`, integration tests, the `postgres_shop` example, and
+  the agent docs all use the flat form — it's the de-facto contract.
+- **Extensibility is unaffected.** A new engine = a new `warehouse:` enum value (validated in
+  `workflowSettingsAsProjectConfig`) plus a `*Connection` proto. No top-level-key invention needed.
+
+The naming-collision concern (flat `warehouse: postgres` vs a database literally named `postgres`)
+is moot: `warehouse` is the engine kind in `workflow_settings.yaml`, while the database/schema live
+in `.df-credentials.json` / `defaultDataset` — different files and keys.
+
+---
+
+_Original proposal (superseded, kept for context) — connection nested under `warehouse:`. Shape:_
 
 ```yaml
 # workflow_settings.yaml — BigQuery variant
@@ -312,14 +349,12 @@ warehouse:
   # connectionString: postgresql://postgres:${PASSWORD}@db.${PROJECT_REF}.supabase.co:5432/postgres
 ```
 
-Why nested over flat:
+_Original rationale for nested (retained for context; see the FLAT decision above for why it was overturned — chiefly secret hygiene): extensibility via a `kind` discriminator, field grouping, and per-variant validation._
 
-- **Extensibility.** Adding AlloyDB / CockroachDB / Redshift later = add a new `kind` value, not invent new top-level keys.
-- **No naming collisions.** Flat `warehouse: postgres` collides semantically with `defaultDatabase: postgres` (kind vs database name). Nested removes the ambiguity.
-- **Grouping.** All connection-affecting fields live in one block. Credentials, defaults, dialect flags all co-located.
-- **Validation.** Discriminated union on `kind` — strict per-variant field validation, no global field that's only meaningful for some warehouses.
-
-Proto representation (`protos/configs.proto`):
+Proto representation (`protos/configs.proto`) — these `*Connection` messages define the
+**`.df-credentials.json`** shape (validated via `verifyObjectMatchesProto(PostgresConnection, ...)`).
+The `WarehouseConfig` oneof exists in the proto but `workflow_settings.yaml` uses the flat
+`warehouse:` string, not this union:
 
 ```proto
 message WarehouseConfig {
