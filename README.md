@@ -12,6 +12,7 @@ The published docs site is the best place to read these: **[sqlanvil.com/docs](h
 
 ## In this repo
 
+- `getting-started-supabase.md` — connect a SQLAnvil project to Supabase (install → init → connection details → first table)
 - `reference/` — generated API reference (regenerated from the code via `scripts/regenerate_docs` in the main repo)
 - `configs-reference.md`, `packages.md` — configuration and package reference
 - `npm_publishing.md`, `upstream_merge_guide.md` — release & upstream-sync runbooks
