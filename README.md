@@ -15,4 +15,5 @@ The published docs site is the best place to read these: **[sqlanvil.com/docs](h
 - `reference/` — generated API reference (regenerated from the code via `scripts/regenerate_docs` in the main repo)
 - `configs-reference.md`, `packages.md` — configuration and package reference
 - `npm_publishing.md`, `upstream_merge_guide.md` — release & upstream-sync runbooks
+- `v2_roadmap.md` — post-V1 feature backlog (more databases, file sources, Dataform→SQLAnvil conversion, interactive `init`)
 - Design documents — `postgres_first_class_design.md`, `postgres_reintegration_assessment.md`, `hybrid_warehouses_supabase_bigquery.md`, and others
