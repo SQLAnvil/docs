@@ -126,6 +126,7 @@ select * from sqlanvil.hello;
 | `tenant ... not found` / `Tenant or user not found` | Wrong pooler **host** (you reached a different region's pooler), or a non-qualified username | Copy the **host verbatim** from the Connect dialog (the `aws-0-`/`aws-1-` prefix + region slug aren't guessable), and set `user` to `postgres.<your-project-ref>`. |
 | `no pg_hba.conf entry ... no encryption` / SSL errors | SSL not requested | Set `"sslMode": "require"`. |
 | `password authentication failed` | Wrong DB password | Reset it in Settings → Database; the CLI can't supply it. |
+| `ECIRCUITBREAKER` / "too many authentication failures, new connections are temporarily blocked" | Supabase's pooler temporarily locked the tenant after repeated auth failures — usually a single wrong-password run (the CLI opens several connections at once, so one bad attempt counts as several) | Fix the password, **wait ~1–2 minutes** for the breaker to reset, then retry. Not a credentials-*method* problem — password auth is correct. |
 | `Unexpected property "//"` (or JSON parse error) | Comment keys / trailing comma in the credentials file | `.df-credentials.json` is strict JSON — remove them. |
 | Prepared-statement / DDL errors mid-run | Using the **transaction** pooler (port 6543) | Use **session** mode (port 5432) or the direct connection. |
 

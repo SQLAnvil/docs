@@ -128,8 +128,8 @@ Validated as a real user, no repo checkout:
 
 These are the things most likely to trip a real user — confirm each is acceptable or fix before release:
 
-1. **Publishing not done** → install and the `init → compile → run` golden path are blocked
-   (Section 0). This is the single biggest gap between "works in-repo" and "a user can use it."
+1. ~~**Publishing not done**~~ — **resolved 2026-06-04**: `@sqlanvil/{cli,core}@1.0.0` published;
+   the `npm install → init → compile → run` golden path is validated (see Results log).
 2. **`init` arg order** — the positional project dir must come *before* `--warehouse`; option-first
    currently errors (`Arg neither flag name nor flag value`). Likely worth fixing — users won't guess.
 3. **`.df-credentials.json` is strict JSON** — comment keys / trailing commas are rejected. Templates
@@ -138,6 +138,13 @@ These are the things most likely to trip a real user — confirm each is accepta
    error messages are good (this is the nice-to-have `sqlanvil validate` item).
 5. **`.df-credentials.json` keeps the legacy `df` name** — cosmetic, but a user may find it odd in a
    tool called sqlanvil.
+6. **Connection failures fan out and trip Supabase's circuit breaker.** The Postgres adapter opens
+   several pooled connections in parallel (`Promise.all` in `table()`/`tables()`/`state`), so a
+   single wrong-password `run` produces N auth failures → Supavisor `ECIRCUITBREAKER` (a temporary
+   tenant-wide lockout, even for the correct password). **Fix:** probe a *single* connection and
+   **fail fast** on auth/connection errors before fanning out — a bad credential should yield one
+   clean `password authentication failed` and never trip the breaker. (Found 2026-06-04 during the
+   wrong-password error-clarity test.)
 
 ## Sign-off
 
