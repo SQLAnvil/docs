@@ -7,6 +7,27 @@ with clear errors and docs?**
 This is deliberately *not* the automated test suite. Run it yourself, as a new user would, on real
 infrastructure. For each item: do the action, confirm the **pass criteria**, record the result.
 
+## Results log
+
+**2026-06-04 — Linux (Docker `node:20`) + published `@sqlanvil/cli@1.0.0` + real Supabase: PASS.**
+Validated as a real user, no repo checkout:
+- Install `npm i -g @sqlanvil/cli`; `sqlanvil --version` → `sqlanvil 1.0.0 (Dataform core 3.0.59)`
+  (global `bin` works, no `npx` needed).
+- `sqlanvil init my_proj --warehouse supabase` → correct scaffold (warehouse, creds template,
+  gitignore, definitions tree).
+- `compile` on a fresh project fetched `@sqlanvil/core@1.0.0` from npm and compiled — the
+  pre-publish `sqlanvilCoreVersion` dead-end is gone.
+- `run` against a real Supabase project (session pooler, IPv4) created **table, incremental (+PK),
+  view, materialized view, operation/function, and an assertion** — all succeeded.
+- **Idempotency:** identical second `run` — no duplicate-PK error, matview refreshed in place —
+  confirms the `dataformVersion` capability gate works in the shipped build.
+- **Error clarity:** wrong password → `password authentication failed for user "postgres"` (clear).
+- Finding (folded into `getting-started-supabase.md`): the Supabase **pooler host must be copied
+  verbatim** — the `aws-0-`/`aws-1-` prefix + region slug aren't guessable; a constructed host fails
+  with `tenant ... not found`.
+
+**Still to validate:** Windows (clean Win11), plain `postgres` (non-Supabase) path, BigQuery path.
+
 ## Test environments to have ready
 
 - A **clean machine** (or container) with no sqlanvil checkout — for the install test.
@@ -21,19 +42,13 @@ infrastructure. For each item: do the action, confirm the **pass criteria**, rec
 
 > If any of these fail, a typical user is blocked before they start. Stop and fix before release.
 
-- [ ] **CLI installs without building from source.** Today `@sqlanvil/cli` / `@sqlanvil/core` are
-      **not published to npm**, so `npm i -g @sqlanvil/cli` fails. A typical user will not build from
-      source with Bazel/Docker. **Blocker until published.**
-- [ ] **The `init` → `compile` → `run` golden path works on a freshly-init'd project with zero manual
-      `node_modules` surgery.** A new project pins `sqlanvilCoreVersion`, and `compile` then runs
-      `npm i @sqlanvil/core@<version>` — which only succeeds once core is published. Verify the whole
-      path end-to-end **after** publishing. **Blocker until published.**
-- [ ] **A quickstart doc exists** (sqlanvil.com/docs or README) whose install + first-project steps
-      match the published reality.
-
-> **Until Section 0 passes,** you can still smoke-test *functionality* from source via `./scripts/run`
-> (e.g. the verified `examples/postgres_shop`), but you cannot validate the real install/golden-path
-> UX. Sections 3–7 below exercise behavior; Sections 0–2 are the real-user entry experience.
+- [x] **CLI installs without building from source.** `@sqlanvil/cli@1.0.0` + `@sqlanvil/core@1.0.0`
+      published to npm 2026-06-04; `npm i -g @sqlanvil/cli` works on a clean machine.
+- [x] **The `init` → `compile` → `run` golden path works on a freshly-init'd project with zero manual
+      `node_modules` surgery.** Validated 2026-06-04 (see Results log): `compile` fetches
+      `@sqlanvil/core@1.0.0` from npm and runs end-to-end against real Supabase.
+- [x] **A quickstart doc exists** matching the published reality —
+      `getting-started-supabase.md` (install → init → connect → first table).
 
 ---
 
