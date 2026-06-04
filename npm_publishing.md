@@ -8,10 +8,13 @@
 - npm organization: **`sqlanvil`** (free tier, public packages)
 - Placeholders published 2026-05-27: `@sqlanvil/cli@0.0.1`,
   `@sqlanvil/core@0.0.1` (name reservations only)
-- **Versioning tracks `DF_VERSION`** in `version.bzl` — i.e. the upstream
-  dataform release the fork is synced to (currently **3.0.59**). The Bazel
-  build stamps both packages from `DF_VERSION`; there is no separate
-  sqlanvil version number. See §4.
+- **Versioning is sqlanvil's own SemVer line: `SQLANVIL_VERSION`** in `version.bzl`
+  (currently **1.0.0**). The Bazel build stamps the npm packages from it.
+  `DF_VERSION` (currently **3.0.59**) is the upstream dataform release this fork is
+  synced to — kept as **metadata** (surfaced in `sqlanvil --version` as
+  `sqlanvil 1.0.0 (Dataform core 3.0.59)` and exported as `dataformVersion` from
+  `@sqlanvil/core`), **not** the package version. Bump `SQLANVIL_VERSION` for
+  sqlanvil releases; bump `DF_VERSION` on upstream syncs. See §4.
 - Real publish target: Bazel-built tarball at
   `bazel-bin/packages/@sqlanvil/cli/package.tar.gz` (and matching for `core`)
 - **For testing, don't publish** — install the built tarball locally
@@ -41,9 +44,10 @@ Both placeholders print "not yet published — see GitHub" and exit
 non-zero. Source not committed — one-shot scaffolding under
 `~/sqlanvil-npm-placeholders/` on Ivan's Mac.
 
-> **Note:** The next real publish will be **3.x** (DF_VERSION parity), not
-> `0.0.2`. This is a deliberate jump — see §4. The `0.0.1` placeholders are
-> superseded the first time a real `3.x` build is published.
+> **Note:** The next real publish will be **`1.0.0`** (`SQLANVIL_VERSION`), not
+> `0.0.2` — sqlanvil's own SemVer line, decoupled from the Dataform base. See §4.
+> The `0.0.1` placeholders are superseded the first time a real `1.x` build is
+> published.
 
 ### Names to consider claiming later
 
@@ -128,7 +132,7 @@ tar tzf sqlanvil-cli.tgz | head -20
 # Should show: package/package.json, package/bundle.js, etc.
 
 tar xzf sqlanvil-cli.tgz -C /tmp/inspect && cat /tmp/inspect/package/package.json
-# Verify name + version are what you expect (version == DF_VERSION)
+# Verify name + version are what you expect (version == SQLANVIL_VERSION, e.g. 1.0.0)
 ```
 
 ### 3.4. Publish
@@ -136,10 +140,10 @@ tar xzf sqlanvil-cli.tgz -C /tmp/inspect && cat /tmp/inspect/package/package.jso
 ```bash
 npm login                                  # 2FA device-auth flow (see §6)
 
-# Real release (version == DF_VERSION, e.g. 3.0.59):
+# Real release (version == SQLANVIL_VERSION, e.g. 1.0.0):
 npm publish ./sqlanvil-cli.tgz --access public
 
-# Beta / test release (set DF_VERSION = "3.0.59-beta.0" first, rebuild):
+# Beta / test release (set SQLANVIL_VERSION = "1.0.0-beta.0" first, rebuild):
 npm publish ./sqlanvil-cli.tgz --access public --tag beta
 ```
 
@@ -149,29 +153,36 @@ npm publish ./sqlanvil-cli.tgz --access public --tag beta
 
 ## 4. Version Policy
 
-**sqlanvil versions track `DF_VERSION`** (in `version.bzl`), which equals the
-upstream `dataform-co/dataform` release the fork is synced to. A published
-`@sqlanvil/core@3.0.59` means "dataform 3.0.59 + the sqlanvil rename +
-Postgres/Supabase work." This gives users a legible parity signal and keeps
-core/cli in lockstep.
+**sqlanvil has its own SemVer line, `SQLANVIL_VERSION`** (in `version.bzl`,
+currently `1.0.0`) — this is the published `@sqlanvil/*` version. **`DF_VERSION`**
+(currently `3.0.59`) is the upstream `dataform-co/dataform` release the fork is
+synced to, kept as **metadata** only: surfaced in `sqlanvil --version`
+(`sqlanvil 1.0.0 (Dataform core 3.0.59)`) and exported as `dataformVersion` from
+`@sqlanvil/core`. The two are independent (you can't express "our build N on top
+of 3.0.59" in 3-segment SemVer like `3.0.59.1`, so the package version is decoupled).
 
-Why parity, not an independent `0.x` line: the CLI enforces its own
-core/cli compatibility at compile time (`cli/vm/compile.ts` requires
-`@sqlanvil/core ^3.0.0` and a cli/core **major.minor match**). An
-independent `0.x` core would make the CLI reject its own core. So the real
-floor is `3.x`, and tracking `DF_VERSION` is the simplest scheme that
-satisfies it.
+Why decouple (supersedes the earlier "track `DF_VERSION`" policy): SemVer is three
+segments, so pinning the package to the exact upstream patch leaves **no room for
+sqlanvil's own iterative releases** between upstream syncs. `@sqlanvil/core` is a
+different npm package than `@dataform/core`, so there is no version collision to
+avoid — mirroring `DF_VERSION` only ever helped human signaling, which the
+`--version` / `dataformVersion` metadata now provides.
 
-- **Real release:** version == `DF_VERSION` (e.g. `3.0.59`). Bump by syncing
-  upstream / editing `version.bzl`.
-- **Prerelease / test:** `DF_VERSION = "X.Y.Z-beta.N"`, published `--tag beta`.
-  Never reuse a real version number for a throwaway test publish — npm
-  versions are permanent and immutable.
+The CLI's compile-time `cli/core` compatibility check derives its floor from the
+**CLI's own version** (`cli/vm/compile.ts` requires a matching major + core ≥
+`cli.major.minor.0`), so cli@`X` + core@`X` (both stamped from `SQLANVIL_VERSION`)
+stay in lockstep automatically. Dataform-capability gates inside the SQL
+generators (e.g. incremental pre/post-ops at `> 1.4.8`, the pre-3.0.57 caller-file
+shim) compare against the **Dataform** version (`dataformVersion`), not the package
+version — so decoupling does not disable them.
+
+- **sqlanvil release:** bump `SQLANVIL_VERSION` in `version.bzl` (e.g. `1.0.0` →
+  `1.0.1` / `1.1.0`).
+- **Upstream sync:** bump `DF_VERSION` (the `scripts/update_version` helper) — this
+  changes the displayed Dataform base, not the package version.
+- **Prerelease / test:** `SQLANVIL_VERSION = "X.Y.Z-beta.N"`, published `--tag beta`.
+  Never reuse a real version number — npm versions are permanent and immutable.
 - **Don't publish at all for local testing** — use §3.0.
-
-> This supersedes the earlier `0.0.x → 0.x.y → 1.0.0` policy, which predated
-> the decision to track upstream versions and conflicts with the CLI's
-> `^3.0.0` self-check.
 
 ## 5. Future: Automate via CI
 
