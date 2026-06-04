@@ -91,3 +91,25 @@ each item has notes so it can be picked up later without re-deriving context.
 - **Decision to make:** ship A first as a stopgap, or go straight to B. Where do environments live —
   separate `environments.json` (Dataform's legacy location) or a block in `workflow_settings.yaml`
   (more consistent with the rest of sqlanvil config)?
+
+## 6. First-class cross-platform data import/export (with type translation)
+
+- [ ] Make moving data **in/out of the active warehouse from/to the other platforms** a first-class
+      sqlanvil capability, with automatic data-type translation.
+- **The model (decided):** a project/run stays **single-warehouse** — multiple live warehouse
+  connections in one project is explicitly **not** wanted (impractical, and adapters stay isolated).
+  Everything internally happens on one DB; this item is about the **edges**: pulling source data in,
+  and pushing results out, across BigQuery ↔ Postgres ↔ Supabase.
+- **Today (no dedicated feature):** cross-platform is achieved via warehouse-native federation —
+  BigQuery federated queries reading Postgres/Supabase, or Supabase Wrappers / Postgres FDW reading
+  BigQuery (see `hybrid_warehouses_supabase_bigquery.md`, Patterns A/C) — plus sequential separate
+  runs for multi-platform outputs (Pattern B). It works but is manual and warehouse-specific.
+- **What "first-class" would add:** an import/export action (or `declaration`/sink variant) that
+  reads from or writes to a *secondary* platform and **translates data types** across engines
+  (e.g. BigQuery `STRUCT`/`ARRAY` ↔ Postgres `jsonb`/arrays, `NUMERIC`/`BIGNUMERIC` ↔ `numeric`,
+  `TIMESTAMP` semantics, Supabase `vector`). Secondary-platform credentials would live alongside the
+  primary `.df-credentials.json` (export/import only — not a second execution engine).
+- **Overlaps with #2 (file-based sources):** files (CSV/Parquet/JSON) are one transport; direct
+  DB→DB movement is the other. Likely share a type-translation layer.
+- **Decision to make:** model the edges as new action types vs. an external `sqlanvil import/export`
+  CLI; how far to take automatic type translation vs. requiring explicit casts.
