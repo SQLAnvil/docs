@@ -26,7 +26,17 @@ Validated as a real user, no repo checkout:
   verbatim** — the `aws-0-`/`aws-1-` prefix + region slug aren't guessable; a constructed host fails
   with `tenant ... not found`.
 
-**Still to validate:** Windows (clean Win11), plain `postgres` (non-Supabase) path, BigQuery path.
+**2026-06-04 — Windows 11 (PowerShell) + published `@sqlanvil/cli@1.0.1` + real Supabase: PASS.**
+Clean Win11 box, no repo:
+- `npm i -g @sqlanvil/cli`; `sqlanvil --version` → `sqlanvil 1.0.1 (Dataform core 3.0.59)` (global
+  `sqlanvil.cmd` shim works in PowerShell).
+- `init --warehouse supabase`, edited `.df-credentials.json`, authored a model (PowerShell
+  here-string, `ascii` — no BOM issue), `compile` → 1 action, `run` → `Table created: sqlanvil.hello`
+  against real Supabase (IPv4 pooler). Paths / args / `--credentials` relative resolution all fine.
+- 1.0.1 fixes confirmed shipped: arg-order (`init --warehouse X DIR` no longer crashes) and the
+  fail-fast connection probe.
+
+**Still to validate:** plain `postgres` (non-Supabase) path, BigQuery path.
 
 ## Test environments to have ready
 
