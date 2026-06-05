@@ -136,7 +136,7 @@ git merge upstream-sync/3.0.58
 # 4. Clean up the sandbox branch
 git branch -d upstream-sync/3.0.58
 
-# 5. Push updated main to your GitHub stealth repository
+# 5. Push updated main to origin (GitHub)
 git push origin main
 ```
 
