@@ -33,8 +33,10 @@ Clean Win11 box, no repo:
 - `init --warehouse supabase`, edited `.df-credentials.json`, authored a model (PowerShell
   here-string, `ascii` — no BOM issue), `compile` → 1 action, `run` → `Table created: sqlanvil.hello`
   against real Supabase (IPv4 pooler). Paths / args / `--credentials` relative resolution all fine.
-- 1.0.1 fixes confirmed shipped: arg-order (`init --warehouse X DIR` no longer crashes) and the
-  fail-fast connection probe.
+- 1.0.1 fixes verified on Windows: arg-order (`init --warehouse X DIR` no longer crashes); and
+  **fail-fast** — a wrong password yields one clean `Could not connect to Supabase Postgres at
+  <host>:<port> as "<user>": password authentication failed` (with host/user context) instead of
+  `ECIRCUITBREAKER`, and a correct-password retry works immediately (no pooler lockout).
 
 **Still to validate:** plain `postgres` (non-Supabase) path, BigQuery path.
 
