@@ -139,3 +139,14 @@ git branch -d upstream-sync/3.0.58
 # 5. Push updated main to your GitHub stealth repository
 git push origin main
 ```
+
+## 5. Local fixes reported upstream (converge on adoption)
+
+Bugs we fixed locally that are **also present upstream** and that we've reported to
+`dataform-co/dataform`. On each sync, check whether upstream adopted the fix — if so, take
+*their* version and drop our local change so the file stops diverging (less future merge friction).
+If not, keep ours and re-apply over the merge.
+
+| File | Local fix | Upstream issue | Status |
+| :--- | :--- | :--- | :--- |
+| `common/flags/index.ts` | Lenient arg parser — ignore non-flag tokens instead of throwing `Arg neither flag name nor flag value` (which crashed the CLI when a positional followed a flag). Extracted `parseArgvFlags()` + test. | [dataform-co/dataform#2198](https://github.com/dataform-co/dataform/issues/2198) | open (not yet adopted) |
