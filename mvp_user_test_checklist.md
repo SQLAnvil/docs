@@ -130,8 +130,10 @@ These are the things most likely to trip a real user — confirm each is accepta
 
 1. ~~**Publishing not done**~~ — **resolved 2026-06-04**: `@sqlanvil/{cli,core}@1.0.0` published;
    the `npm install → init → compile → run` golden path is validated (see Results log).
-2. **`init` arg order** — the positional project dir must come *before* `--warehouse`; option-first
-   currently errors (`Arg neither flag name nor flag value`). Likely worth fixing — users won't guess.
+2. ~~**`init` arg order**~~ — **resolved 2026-06-04** (ships in 1.0.1): the global `common/flags`
+   parser threw `Arg neither flag name nor flag value` on a positional after a flag, crashing the
+   CLI; it now ignores non-flag args. Both `init <dir> --warehouse X` and `init --warehouse X <dir>`
+   work. Regression-tested in `common/flags/index_test.ts`.
 3. **`.df-credentials.json` is strict JSON** — comment keys / trailing commas are rejected. Templates
    and docs must be comment-free, and the error should be readable.
 4. **No Postgres `--dry-run` / `validate`** — SQL errors only surface at `run` time. Make sure runtime
