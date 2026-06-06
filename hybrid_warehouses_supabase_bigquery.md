@@ -1,6 +1,10 @@
 # Hybrid Warehouse Architecture: Supabase & BigQuery
 
-This document outlines how **SqlAnvil** (Dataform) supports both **PostgreSQL (Supabase)** and **Google BigQuery**, and details the architectural patterns for utilizing both warehouses together as sources, targets, or coexisting elements in your data stack.
+This document outlines how **SQLAnvil** supports both **PostgreSQL (Supabase)** and **Google BigQuery**, and details the architectural patterns for utilizing both warehouses together as sources, targets, or coexisting elements in your data stack.
+
+> For the hands-on version of Pattern C below — reading a BigQuery (or second Postgres) table as a
+> live foreign table — see **[Named Connections](./named-connections.md)**. SQLAnvil now
+> auto-generates the FDW bridge from a `connections:` entry; you no longer hand-write the wrapper.
 
 ---
 
@@ -22,7 +26,7 @@ SqlAnvil is architected around a unified interface, the **`IDbAdapter`** (define
      [ Google Cloud ]    [ Supabase / PG ]
 ```
 
-* **Dynamic Instantiation:** The CLI reads your project's `dataform.json` config. Depending on the `"warehouse"` configuration, it dynamically instantiates either the `BigQueryDbAdapter` or `PostgresDbAdapter` to execute the compiled SQL graph.
+* **Dynamic Instantiation:** The CLI reads your project's `workflow_settings.yaml` config. Depending on the `warehouse:` configuration, it dynamically instantiates either the `BigQueryDbAdapter` or `PostgresDbAdapter` to execute the compiled SQL graph.
 * **No Code Bloat:** Adapters are isolated from each other. You can safely build and scale both database engines inside the same command-line tool.
 
 ---
@@ -73,11 +77,11 @@ For larger apps, it is often optimal to run lightweight schema cleanups locally 
 ### Pattern C: Supabase Wrappers (BigQuery &rarr; Supabase)
 If your application needs to display high-level analytical results (computed in BigQuery) to end-users inside the live Supabase app, you can use **Supabase Wrappers** (Postgres Foreign Data Wrappers).
 
-1. **Model in BigQuery:** Use SqlAnvil to process high-compute metrics in BigQuery (e.g., predicting customer churn risk or computing multi-month cohort retention).
+1. **Model in BigQuery:** Use SQLAnvil to process high-compute metrics in BigQuery (e.g., predicting customer churn risk or computing multi-month cohort retention).
 2. **Expose in Supabase:**
-   * Enable the BigQuery Wrapper in your Supabase database.
-   * Query the resulting BigQuery analytical table as a Foreign Table directly inside your Supabase Postgres schema.
-   * Your frontend web/mobile application can query the metrics instantly using standard Supabase client SDKs (`supabase.from('churn_predictions')`).
+   * Declare the BigQuery table as a [named connection](./named-connections.md) — SQLAnvil enables the wrapper, creates the foreign server, and exposes a `ref()`-able foreign table for you (no hand-written wrapper).
+   * Downstream SQLAnvil models join or materialize it like any other source.
+   * Your frontend web/mobile application can query the result instantly using standard Supabase client SDKs (`supabase.from('churn_predictions')`).
 
 ---
 

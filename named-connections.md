@@ -1,0 +1,166 @@
+# Named Connections: Cross-Warehouse Sources
+
+Read a table that lives in *another* warehouse — BigQuery, or a second Postgres — as if it
+were local, with no ETL job. You declare the remote warehouse once as a **named connection**,
+tag a declaration with it, and SQLAnvil auto-generates the Foreign Data Wrapper (FDW) bridge so
+`${ref(...)}` resolves to a live foreign table.
+
+> **Requires `@sqlanvil/core` 1.1.1 or newer.** (1.1.0 shipped this feature but dropped
+> connections in the published package.) Pin it in `workflow_settings.yaml` with
+> `sqlanvilCoreVersion: 1.1.1`.
+
+> **One write warehouse, many read-only sources.** SQLAnvil writes to exactly one warehouse —
+> your `warehouse:`. Named connections are read-only sources you pull *from*; SQLAnvil never
+> writes back to them. The read (write) warehouse must be **`postgres`** or **`supabase`**,
+> because the bridge is a Postgres FDW. The source connection can be `bigquery`, `postgres`, or
+> `supabase`. On Supabase, enable the **`wrappers`** extension (Dashboard → Database →
+> Extensions).
+
+## 1. Declare the connection
+
+In `workflow_settings.yaml`, add a `connections:` map. Each entry names a warehouse and how to
+reach it. Example — a read-only BigQuery public dataset, read from a Supabase project:
+
+```yaml
+warehouse: supabase          # the one warehouse SQLAnvil writes to
+defaultDataset: public
+sqlanvilCoreVersion: 1.1.1
+
+connections:
+  bigquery_public:
+    platform: bigquery
+    project: bigquery-public-data
+    dataset: geo_us_boundaries
+    saKeyId: "REPLACE_WITH_VAULT_SECRET_ID"   # non-secret Vault pointer (see step 4)
+```
+
+Connection fields by platform:
+
+| Platform | Fields |
+| :--- | :--- |
+| `bigquery` | `platform`, `project`, `dataset`, `saKeyId` |
+| `postgres` / `supabase` | `platform`, `host`, `port`, `database`, `defaultSchema`, `saKeyId` |
+
+Nothing secret lives in `workflow_settings.yaml`: `saKeyId` is the **id** of a secret stored in
+Supabase Vault (step 4), not the credential itself.
+
+## 2. Add a connection-tagged declaration
+
+A declaration tagged with `connection:` tells SQLAnvil "this source lives in another warehouse —
+build the bridge to it." It needs `columnTypes` (the FDW must know the column types to create the
+foreign table), expressed as **Postgres** types since the foreign table is a Postgres object:
+
+```js
+// definitions/sources/zip_codes.sqlx
+config {
+  type: "declaration",
+  connection: "bigquery_public",
+  name: "zip_codes",
+  columnTypes: {
+    zip_code: "text",
+    internal_point_lat: "float8",
+    internal_point_lon: "float8"
+  }
+}
+```
+
+You can write `columnTypes` by hand, or generate the whole declaration from the live source
+schema with `sqlanvil introspect` (see [step 5](#5-optional-generate-the-declaration-with-introspect)).
+
+## 3. Reference it like any other source
+
+Downstream models `${ref(...)}` the declaration by name — no special syntax:
+
+```sql
+-- definitions/staging/stg_zip_codes.sqlx
+config { type: "view", schema: "staging" }
+SELECT
+  zip_code,
+  internal_point_lat AS lat,
+  internal_point_lon AS lon
+FROM ${ref("zip_codes")}
+```
+
+## 4. Store the source credential in Vault (BigQuery)
+
+The FDW server reads the BigQuery service-account key at run time from Supabase Vault, by **id**.
+Create the secret once in the Supabase SQL editor:
+
+```sql
+-- Paste your service-account JSON. Returns the secret id.
+select vault.create_secret('<paste service-account JSON>', 'bigquery_sa');
+
+-- Read the id back:
+select id from vault.secrets where name = 'bigquery_sa';
+```
+
+Put the returned id in `connections.bigquery_public.saKeyId`.
+
+## 5. (Optional) Generate the declaration with `introspect`
+
+Instead of hand-writing `columnTypes`, let SQLAnvil read the remote schema and write the
+declaration for you:
+
+```bash
+sqlanvil introspect bigquery_public geo_us_boundaries.zip_codes \
+  --output definitions/sources/zip_codes.sqlx
+```
+
+`introspect <connection> <schema.table>` connects to the source using read credentials you've
+configured for that connection and maps each source column to a Postgres type. Without
+`--output` it prints to stdout. This is a build-time convenience; it's separate from the run-time
+Vault `saKeyId` the FDW server uses.
+
+## 6. Compile
+
+```bash
+sqlanvil compile .
+```
+
+Compiling generates the bridge automatically. For the `bigquery_public` connection you'll see
+these extra actions alongside your own models:
+
+- **`bigquery_public_srv`** — an operation that enables the wrapper extension and creates the
+  foreign server (named `<connection>_srv`).
+- **`bigquery_public_ext.zip_codes`** — the ref-able foreign table, in the auto-named
+  `<connection>_ext` schema.
+
+Multiple declarations on the same connection share one server.
+
+## 7. Run
+
+```bash
+sqlanvil run .
+```
+
+This creates the server and foreign table, then builds everything downstream — one pass, no
+separate sync job.
+
+## How the bridge maps
+
+| You write | SQLAnvil generates |
+| :--- | :--- |
+| connection `bigquery_public` | server `bigquery_public_srv` + schema `bigquery_public_ext` |
+| declaration `zip_codes` | foreign table `bigquery_public_ext.zip_codes` |
+| `${ref("zip_codes")}` | a query against the live foreign table |
+
+## Worked example
+
+[`examples/supabase_bigquery_mailing_list`](https://github.com/sqlanvil/sqlanvil/tree/main/examples/supabase_bigquery_mailing_list)
+is a complete, runnable version of this pattern: it joins Supabase commerce data with BigQuery
+geo data (via a named connection) to build a proximity mailing list. Copy it out and follow its
+README to run end-to-end.
+
+## Troubleshooting
+
+| Symptom | Likely cause | Fix |
+| :--- | :--- | :--- |
+| `Unknown connection "X" on declaration "Y"` at compile | the declaration's `connection:` doesn't match a key under `connections:` | Check the name. If it *does* match, ensure `@sqlanvil/core` is **≥ 1.1.1** — 1.1.0 dropped connections in the published package. |
+| `Declaration "X" on connection "Y" requires columnTypes` | a connection-tagged declaration with no `columnTypes` | Add them, or run `sqlanvil introspect <conn> <schema.table> --output <file>`. |
+| `Reading connection "X" from a bigquery warehouse is not yet supported` | your `warehouse:` is `bigquery` | The read side must be `postgres`/`supabase` — the FDW bridge is a Postgres feature. |
+| Wrapper/extension errors on `run` | the `wrappers` extension isn't enabled on the database | Enable it (Supabase Dashboard → Database → Extensions). |
+
+## Related
+
+- [Getting Started with Supabase](./getting-started-supabase.md) — set up the write warehouse first.
+- [Hybrid Warehouse Architecture](./hybrid_warehouses_supabase_bigquery.md) — the architectural patterns behind cross-warehouse stacks.
