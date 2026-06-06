@@ -132,6 +132,8 @@ select * from sqlanvil.hello;
 
 ## Next steps
 
+- **Using Claude Code?** Install the `sqlanvil-toolkit` plugin so the assistant writes correct
+  SQLAnvil code (not Dataform/BigQuery guesses) — see [Using SQLAnvil with Claude Code](./claude-code.md).
 - Add real models: tables, incremental tables, views, materialized views, assertions, and
   `operations` (functions/procedures). See the configuration reference.
 - Supabase-native features: RLS policies, Realtime publications, and pgvector indexes.
