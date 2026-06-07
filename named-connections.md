@@ -1,18 +1,13 @@
 # Named Connections: Cross-Warehouse Sources
 
-Read a table that lives in **BigQuery** — as if it were local, with no ETL job. You declare the
-remote warehouse once as a **named connection**, tag a declaration with it, and SQLAnvil
-auto-generates the Foreign Data Wrapper (FDW) bridge so `${ref(...)}` resolves to a live foreign
-table.
+Read a table that lives in **another warehouse** — BigQuery, or a second Postgres — as if it were
+local, with no ETL job. You declare the remote warehouse once as a **named connection**, tag a
+declaration with it, and SQLAnvil auto-generates the Foreign Data Wrapper (FDW) bridge so
+`${ref(...)}` resolves to a live foreign table.
 
-> **Requires `@sqlanvil/core` 1.1.1 or newer.** (1.1.0 shipped this feature but dropped
-> connections in the published package.) Pin it in `workflow_settings.yaml` with
-> `sqlanvilCoreVersion: 1.1.1`.
-
-> **BigQuery sources are the supported path today.** A `platform: postgres`/`supabase` source
-> *compiles*, but is **not yet runnable** — SQLAnvil doesn't emit the `postgres_fdw` user mapping,
-> so the foreign server has no credentials at run time. Use BigQuery sources for now; Postgres
-> sources are tracked for a future release.
+> **Requires `@sqlanvil/core` 1.2.0 or newer** for Postgres/Supabase sources (the
+> `postgres_fdw` user mapping + run-time credential injection landed in 1.2.0). BigQuery
+> sources work from 1.1.1. Pin it in `workflow_settings.yaml` with `sqlanvilCoreVersion: 1.2.0`.
 
 > **One write warehouse, many read-only sources.** SQLAnvil writes to exactly one warehouse —
 > your `warehouse:`. Named connections are read-only sources you pull *from*; SQLAnvil never
@@ -28,7 +23,7 @@ reach it. Example — a read-only BigQuery public dataset, read from a Supabase 
 ```yaml
 warehouse: supabase          # the one warehouse SQLAnvil writes to
 defaultDataset: public
-sqlanvilCoreVersion: 1.1.1
+sqlanvilCoreVersion: 1.2.0
 
 connections:
   bigquery_public:
@@ -43,7 +38,13 @@ Connection fields by platform:
 | Platform | Fields |
 | :--- | :--- |
 | `bigquery` | `platform`, `project`, `dataset`, `saKeyId` |
-| `postgres` / `supabase` *(not yet runnable — see note above)* | `platform`, `host`, `port`, `database`, `defaultSchema` |
+| `postgres` / `supabase` | `platform`, `host`, `port`, `database`, `defaultSchema` |
+
+For a **`postgres`/`supabase` source**, the secret `user`/`password` are **not** in
+`workflow_settings.yaml` — they go in the gitignored `.df-credentials.json` under
+`connections.<name>` and are injected into the generated `CREATE USER MAPPING` at run time (see
+[step 5](#5-optional-generate-the-declaration-with-introspect) for the file shape). The
+non-secret `host`/`port`/`database` above feed the foreign server at compile time.
 
 Nothing secret lives in `workflow_settings.yaml`: `saKeyId` is the **id** of a secret stored in
 Supabase Vault (step 4), not the credential itself.
