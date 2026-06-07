@@ -35,6 +35,17 @@ each item has notes so it can be picked up later without re-deriving context.
 - **Decision to make:** one warehouse-agnostic `source: { format, location }` surface that each
   adapter implements its own way, vs. per-warehouse blocks. Consider cloud object storage
   (S3/GCS/Azure) URIs, not just local paths.
+- **Cloud object storage I/O — read *and* write.** BigQuery supports GCS natively, in a plain
+  operation, both directions: read via external/federated tables + `LOAD DATA` + wildcard `gs://…`
+  URIs; write via `EXPORT DATA OPTIONS(uri = 'gs://…', format = 'JSON'|'CSV'|'PARQUET') AS SELECT …`
+  (working example: the acuantia project's
+  `definitions/operations/gemstone_ai/op_export_gemstone_product_jsonl.sqlx`). **V2 goal:** an
+  equivalent for **Postgres/Supabase** — export a query result to, and read a file from, object
+  storage. Postgres has no native `gs://` I/O, so options: a Supabase Wrapper/FDW, an extension, a
+  `COPY (…) TO/FROM PROGRAM` streaming helper, or DuckDB (`httpfs`) as a bridge.
+- **Out of scope — consumer file-sync (Dropbox, Google Drive, …).** These aren't queryable object
+  stores; supporting them is a separate *fetch connector* (API auth → download → load), not
+  in-place object-store access. Track separately if ever wanted.
 
 ## 3. Dataform → SQLAnvil conversion script
 
