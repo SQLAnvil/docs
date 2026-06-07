@@ -35,9 +35,8 @@ steers Claude onto:
   options, materialized views — never hand-rolled `post_operations` DDL
 - `---` as the statement separator; procedures/functions/triggers via `type: "operations"`
 - Supabase extras: RLS policies, Realtime, pgvector
-- **Named connections** — read a table from another warehouse (BigQuery, a second Postgres) as a
-  live foreign table via the auto-generated FDW bridge, generated with `introspect`
-  (see [Named Connections](./named-connections.md))
+- **Named connections** — read a BigQuery table as a live foreign table via the auto-generated
+  FDW bridge, generated with `introspect` (see [Named Connections](./named-connections.md))
 
 **Slash commands:**
 

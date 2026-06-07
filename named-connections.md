@@ -1,20 +1,24 @@
 # Named Connections: Cross-Warehouse Sources
 
-Read a table that lives in *another* warehouse — BigQuery, or a second Postgres — as if it
-were local, with no ETL job. You declare the remote warehouse once as a **named connection**,
-tag a declaration with it, and SQLAnvil auto-generates the Foreign Data Wrapper (FDW) bridge so
-`${ref(...)}` resolves to a live foreign table.
+Read a table that lives in **BigQuery** — as if it were local, with no ETL job. You declare the
+remote warehouse once as a **named connection**, tag a declaration with it, and SQLAnvil
+auto-generates the Foreign Data Wrapper (FDW) bridge so `${ref(...)}` resolves to a live foreign
+table.
 
 > **Requires `@sqlanvil/core` 1.1.1 or newer.** (1.1.0 shipped this feature but dropped
 > connections in the published package.) Pin it in `workflow_settings.yaml` with
 > `sqlanvilCoreVersion: 1.1.1`.
 
+> **BigQuery sources are the supported path today.** A `platform: postgres`/`supabase` source
+> *compiles*, but is **not yet runnable** — SQLAnvil doesn't emit the `postgres_fdw` user mapping,
+> so the foreign server has no credentials at run time. Use BigQuery sources for now; Postgres
+> sources are tracked for a future release.
+
 > **One write warehouse, many read-only sources.** SQLAnvil writes to exactly one warehouse —
 > your `warehouse:`. Named connections are read-only sources you pull *from*; SQLAnvil never
 > writes back to them. The read (write) warehouse must be **`postgres`** or **`supabase`**,
-> because the bridge is a Postgres FDW. The source connection can be `bigquery`, `postgres`, or
-> `supabase`. On Supabase, enable the **`wrappers`** extension (Dashboard → Database →
-> Extensions).
+> because the bridge is a Postgres FDW. On Supabase, enable the **`wrappers`** extension
+> (Dashboard → Database → Extensions).
 
 ## 1. Declare the connection
 
@@ -39,7 +43,7 @@ Connection fields by platform:
 | Platform | Fields |
 | :--- | :--- |
 | `bigquery` | `platform`, `project`, `dataset`, `saKeyId` |
-| `postgres` / `supabase` | `platform`, `host`, `port`, `database`, `defaultSchema`, `saKeyId` |
+| `postgres` / `supabase` *(not yet runnable — see note above)* | `platform`, `host`, `port`, `database`, `defaultSchema` |
 
 Nothing secret lives in `workflow_settings.yaml`: `saKeyId` is the **id** of a secret stored in
 Supabase Vault (step 4), not the credential itself.
