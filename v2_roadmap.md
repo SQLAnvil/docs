@@ -22,30 +22,51 @@ each item has notes so it can be picked up later without re-deriving context.
   (`INSERT ... ON DUPLICATE KEY UPDATE` vs `ON CONFLICT`), no materialized views (emulate?),
   no `CREATE INDEX ... INCLUDE`, different partitioning syntax, no transactional DDL.
 
-## 2. File-based source support (CSV, Parquet, JSON, …)
+## 2. Import/export at the warehouse edges — files, object storage, and cross-platform (DB↔DB)
 
-- [ ] Model file sources as a first-class concept (likely a declaration/source variant or a new
-      action type that resolves to a queryable relation).
-- **Why it's uneven across warehouses:** BigQuery has this built in (external/federated tables,
-  `LOAD DATA`, wildcard URIs over GCS). Postgres does **not** out of the box — options:
-  - `file_fdw` (CSV/text, server-side files only),
-  - `COPY ... FROM` (load into a real table; needs a target schema),
-  - `parquet_fdw` / `pg_parquet` extensions (Parquet),
-  - DuckDB as an embedded query engine for Parquet/CSV/JSON (could double as item 1).
-- **Decision to make:** one warehouse-agnostic `source: { format, location }` surface that each
-  adapter implements its own way, vs. per-warehouse blocks. Consider cloud object storage
-  (S3/GCS/Azure) URIs, not just local paths.
-- **Cloud object storage I/O — read *and* write.** BigQuery supports GCS natively, in a plain
-  operation, both directions: read via external/federated tables + `LOAD DATA` + wildcard `gs://…`
-  URIs; write via `EXPORT DATA OPTIONS(uri = 'gs://…', format = 'JSON'|'CSV'|'PARQUET') AS SELECT …`
-  (working example: the acuantia project's
-  `definitions/operations/gemstone_ai/op_export_gemstone_product_jsonl.sqlx`). **V2 goal:** an
-  equivalent for **Postgres/Supabase** — export a query result to, and read a file from, object
-  storage. Postgres has no native `gs://` I/O, so options: a Supabase Wrapper/FDW, an extension, a
-  `COPY (…) TO/FROM PROGRAM` streaming helper, or DuckDB (`httpfs`) as a bridge.
-- **Out of scope — consumer file-sync (Dropbox, Google Drive, …).** These aren't queryable object
-  stores; supporting them is a separate *fetch connector* (API auth → download → load), not
-  in-place object-store access. Track separately if ever wanted.
+A project/run stays **single-warehouse** — multiple live warehouse connections in one project is
+explicitly **not** wanted (adapters stay isolated). Everything internally happens on one DB; this
+item is about the **edges**: getting data *in* (sources) and pushing results *out* (sinks), whether
+the other end is a **file / object store** or **another database**. The two transports share a
+type-translation layer.
+
+### 2a. Files & object storage (CSV / Parquet / JSON)
+
+- [ ] Model a file as a first-class **source** (a `declaration`/source variant or a new action type
+      that resolves to a queryable relation) and the reverse for **export** (sink).
+- **Why it's uneven:** BigQuery has it built in — external/federated tables, `LOAD DATA`, wildcard
+  `gs://…` URIs for **read**, and `EXPORT DATA OPTIONS(uri = 'gs://…', format = 'JSON'|'CSV'|'PARQUET')
+  AS SELECT …` for **write** — all in a plain operation (working example: the acuantia project's
+  `definitions/operations/gemstone_ai/op_export_gemstone_product_jsonl.sqlx`). Postgres has **no**
+  native `gs://`/file I/O out of the box — options: `file_fdw` (server-side CSV), `COPY … FROM/TO`
+  (incl. `… PROGRAM` to stream to/from object storage), `parquet_fdw` / `pg_parquet`, a Supabase
+  Wrapper/FDW, or DuckDB (`httpfs`) as an embedded bridge for Parquet/CSV/JSON on S3/GCS/Azure.
+- **V2 goal:** a warehouse-agnostic `{ format, location }` surface (`gs://`/`s3://`/local URIs) each
+  adapter implements its own way — specifically a **Postgres/Supabase equivalent** of BigQuery's
+  native object-storage read **and** write.
+
+### 2b. Cross-platform DB↔DB movement (with type translation)
+
+- [ ] An import/export action (or `declaration`/sink variant) that reads from / writes to a
+      *secondary database* — BigQuery ↔ Postgres ↔ Supabase.
+- **Today (no dedicated feature):** warehouse-native federation — BigQuery federated queries reading
+  Postgres/Supabase, or Supabase Wrappers / Postgres FDW reading BigQuery (see
+  `hybrid_warehouses_supabase_bigquery.md`, Patterns A/C) — plus sequential separate runs for
+  multi-platform outputs (Pattern B). Works, but manual and warehouse-specific. **Named connections
+  (shipped in core 1.2.0)** already cover the *read* direction for FDW-reachable sources; this item
+  is the first-class, type-aware generalization (incl. the write/export direction).
+- Secondary-platform credentials live alongside the primary `.df-credentials.json` (import/export
+  only — not a second execution engine).
+
+### Shared & out of scope
+
+- **Type translation** (both transports): BigQuery `STRUCT`/`ARRAY` ↔ Postgres `jsonb`/arrays,
+  `NUMERIC`/`BIGNUMERIC` ↔ `numeric`, `TIMESTAMP` semantics, Supabase `vector`, etc.
+- **Out of scope — consumer file-sync (Dropbox, Google Drive, …):** not queryable object stores;
+  supporting them is a separate *fetch connector* (API auth → download → load), not in-place access.
+- **Decisions:** model the edges as new action types vs. an external `sqlanvil import/export` CLI;
+  one warehouse-agnostic `{ format, location }`/connection surface vs. per-warehouse blocks; how far
+  to push automatic type translation vs. requiring explicit casts.
 
 ## 3. Dataform → SQLAnvil conversion script
 
@@ -102,25 +123,3 @@ each item has notes so it can be picked up later without re-deriving context.
 - **Decision to make:** ship A first as a stopgap, or go straight to B. Where do environments live —
   separate `environments.json` (Dataform's legacy location) or a block in `workflow_settings.yaml`
   (more consistent with the rest of sqlanvil config)?
-
-## 6. First-class cross-platform data import/export (with type translation)
-
-- [ ] Make moving data **in/out of the active warehouse from/to the other platforms** a first-class
-      sqlanvil capability, with automatic data-type translation.
-- **The model (decided):** a project/run stays **single-warehouse** — multiple live warehouse
-  connections in one project is explicitly **not** wanted (impractical, and adapters stay isolated).
-  Everything internally happens on one DB; this item is about the **edges**: pulling source data in,
-  and pushing results out, across BigQuery ↔ Postgres ↔ Supabase.
-- **Today (no dedicated feature):** cross-platform is achieved via warehouse-native federation —
-  BigQuery federated queries reading Postgres/Supabase, or Supabase Wrappers / Postgres FDW reading
-  BigQuery (see `hybrid_warehouses_supabase_bigquery.md`, Patterns A/C) — plus sequential separate
-  runs for multi-platform outputs (Pattern B). It works but is manual and warehouse-specific.
-- **What "first-class" would add:** an import/export action (or `declaration`/sink variant) that
-  reads from or writes to a *secondary* platform and **translates data types** across engines
-  (e.g. BigQuery `STRUCT`/`ARRAY` ↔ Postgres `jsonb`/arrays, `NUMERIC`/`BIGNUMERIC` ↔ `numeric`,
-  `TIMESTAMP` semantics, Supabase `vector`). Secondary-platform credentials would live alongside the
-  primary `.df-credentials.json` (export/import only — not a second execution engine).
-- **Overlaps with #2 (file-based sources):** files (CSV/Parquet/JSON) are one transport; direct
-  DB→DB movement is the other. Likely share a type-translation layer.
-- **Decision to make:** model the edges as new action types vs. an external `sqlanvil import/export`
-  CLI; how far to take automatic type translation vs. requiring explicit casts.
