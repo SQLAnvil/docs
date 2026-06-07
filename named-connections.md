@@ -99,17 +99,44 @@ Put the returned id in `connections.bigquery_public.saKeyId`.
 ## 5. (Optional) Generate the declaration with `introspect`
 
 Instead of hand-writing `columnTypes`, let SQLAnvil read the remote schema and write the
-declaration for you:
+declaration for you. `introspect` connects to the source from your machine at build time, so it
+needs **read credentials for the source connection**. Put them in `.df-credentials.json` under a
+`connections` map (keyed by connection name) — alongside, not mixed into, your flat write-warehouse
+credentials:
+
+```json
+{
+  "host": "aws-1-us-east-1.pooler.supabase.com",
+  "port": 5432,
+  "database": "postgres",
+  "user": "postgres.<project-ref>",
+  "password": "<warehouse-password>",
+  "sslMode": "require",
+  "defaultSchema": "public",
+
+  "connections": {
+    "bigquery_public": { "credentials": { "type": "service_account", "...": "service-account JSON" } }
+  }
+}
+```
+
+- **BigQuery source:** `{ "credentials": <service-account key JSON> }`.
+- **Postgres/Supabase source:** `{ "host", "port", "database", "user", "password", "sslMode" }`.
+
+This file stays gitignored. The `connections` map is read only by `introspect`; `run` reads the
+flat warehouse credentials and ignores it. (This is distinct from the run-time Vault `saKeyId` the
+FDW server uses inside Supabase — that's the *runtime* credential; this is the *build-time* one for
+reading the schema.)
+
+Then generate the declaration:
 
 ```bash
 sqlanvil introspect bigquery_public geo_us_boundaries.zip_codes \
   --output definitions/sources/zip_codes.sqlx
 ```
 
-`introspect <connection> <schema.table>` connects to the source using read credentials you've
-configured for that connection and maps each source column to a Postgres type. Without
-`--output` it prints to stdout. This is a build-time convenience; it's separate from the run-time
-Vault `saKeyId` the FDW server uses.
+`introspect <connection> <schema.table>` maps each source column to a Postgres type. Without
+`--output` it prints to stdout.
 
 ## 6. Compile
 
