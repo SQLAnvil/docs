@@ -147,6 +147,6 @@ Bugs we fixed locally that are **also present upstream** and that we've reported
 *their* version and drop our local change so the file stops diverging (less future merge friction).
 If not, keep ours and re-apply over the merge.
 
-| File | Local fix | Upstream issue | Status |
+| File | Local fix | Upstream issue / PR | Status |
 | :--- | :--- | :--- | :--- |
-| `common/flags/index.ts` | Lenient arg parser — ignore non-flag tokens instead of throwing `Arg neither flag name nor flag value` (which crashed the CLI when a positional followed a flag). Extracted `parseArgvFlags()` + test. | [dataform-co/dataform#2198](https://github.com/dataform-co/dataform/issues/2198) | open (not yet adopted) |
+| `common/flags/index.ts` | Lenient arg parser — ignore non-flag tokens instead of throwing `Arg neither flag name nor flag value` (which crashed the CLI when a positional followed a flag). Extracted `parseArgvFlags()` + test. | issue [dataform-co/dataform#2198](https://github.com/dataform-co/dataform/issues/2198) → fixed by PR [#2199](https://github.com/dataform-co/dataform/pull/2199) | PR open, not merged (not on `main`, not tagged) — watch #2199 for the convergence trigger |
