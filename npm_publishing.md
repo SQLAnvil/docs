@@ -39,15 +39,13 @@ Free plan is sufficient — sqlanvil is OSS, no private packages needed.
 | :--- | :--- | :--- | :--- |
 | `@sqlanvil/cli` | `0.0.1` | 2026-05-27 | placeholder (name reservation) |
 | `@sqlanvil/core` | `0.0.1` | 2026-05-27 | placeholder (name reservation) |
+| `@sqlanvil/core` | `1.4.0` | 2026-06-16 | real (`latest`) — compile node selection |
+| `@sqlanvil/cli` | `1.4.0` | 2026-06-16 | real (`latest`) — compile node selection |
 
-Both placeholders print "not yet published — see GitHub" and exit
-non-zero. Source not committed — one-shot scaffolding under
-`~/sqlanvil-npm-placeholders/` on Ivan's Mac.
-
-> **Note:** The next real publish will be **`1.0.0`** (`SQLANVIL_VERSION`), not
-> `0.0.2` — sqlanvil's own SemVer line, decoupled from the Dataform base. See §4.
-> The `0.0.1` placeholders are superseded the first time a real `1.x` build is
-> published.
+The `0.0.1` rows are the original name-reservation placeholders (source not
+committed — one-shot scaffolding under `~/sqlanvil-npm-placeholders/` on Ivan's
+Mac); they were superseded by the first real `1.x` publish. The current
+published version of both packages is **`1.4.0`** (`latest`).
 
 ### Names to consider claiming later
 
