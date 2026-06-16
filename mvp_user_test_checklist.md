@@ -38,7 +38,14 @@ Clean Win11 box, no repo:
   <host>:<port> as "<user>": password authentication failed` (with host/user context) instead of
   `ECIRCUITBREAKER`, and a correct-password retry works immediately (no pooler lockout).
 
-**Still to validate:** plain `postgres` (non-Supabase) path, BigQuery path.
+**2026-06-16 — macOS host + published `@sqlanvil/cli@1.4.0` + local real Postgres: PASS (with 2 bugs filed).**
+Real-user flow, clean dir, no repo checkout; `sqlanvil 1.4.0 (Dataform core 3.0.59)`:
+- Golden path `init`→`compile`→`run` end-to-end on Postgres; declaration, table, view, **materialized view**, incremental (+PK via `when(!incremental())`, no dup on rerun), `fillfactor`, COMMENTs, assertions (pass), operation with `$$` body — all succeeded.
+- **1.4.0 `compile` node selection (#26) verified live**: `--actions` / `--tags` / `--include-deps` / `--include-dependents` filter `compile --json`, empty match exits 0, no-selector validation errors; `help compile` wording is output-focused (#29).
+- `--full-refresh`, `--schema-suffix` (sources not suffixed), run subsetting all work.
+- **Bugs found:** [#31] `postgres.indexes` without a `name` → `CREATE INDEX ""` fails (*zero-length delimited identifier*) — blocker; [#32] any failing statement double-releases the pg client (misleading stack trace before the real error).
+
+**Still to validate:** plain `postgres` cloud (managed, non-local) path, BigQuery path, Supabase real-project (Section 7).
 
 ## Test environments to have ready
 
@@ -78,7 +85,7 @@ Clean Win11 box, no repo:
 - [ ] Generated files are readable and obviously editable — a user understands what to fill in.
 - [ ] `sqlanvil init my_proj --warehouse supabase` → credentials template uses `sslMode: require`
       and a `db.<project-ref>.supabase.co` host placeholder.
-- [ ] BigQuery (default) still requires a project + location; omitting them gives a clear error.
+- [ ] **Default warehouse is now `supabase`** (not BigQuery) — `init my_proj` with no `--warehouse` scaffolds a Supabase project. `init --warehouse bigquery` still requires a project + location; omitting them gives a clear error (note: it currently also prints a raw stack trace — see #17 finding 3).
 - [ ] **Arg order:** confirm whether `sqlanvil init my_proj --warehouse postgres` works *and*
       `sqlanvil init --warehouse postgres my_proj` works. (Known rough edge — option-before-positional
       currently errors. A typical user will try both.)
