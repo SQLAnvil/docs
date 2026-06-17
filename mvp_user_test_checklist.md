@@ -51,7 +51,13 @@ Isolated under a throwaway `sa_acceptance` schema, dropped after:
 - **RLS** policy created + enabled + **enforcement confirmed** (as `authenticated` with `request.jwt.claims.sub`, only the owner's row visible via `auth.uid()`); **realtime** publication membership; **vector index** (`hnsw`, `vector_cosine_ops`, `m=16`); **wrapper** (`bigquery_wrapper` FDW + `bq_server`). Second run idempotent.
 - Connection note: must use the **session pooler** host (direct `db.<ref>.supabase.co` has no DNS record → `ENOTFOUND`); the pooler endpoint is tenant-specific (`aws-1` here, `aws-0` returned `tenant not found`). CLI errors are clear + fail-fast.
 
-**Still to validate:** plain `postgres` cloud (managed, non-local) path, BigQuery path + named connections / `introspect`.
+**2026-06-17 — published `@sqlanvil/cli@1.4.1` + real BigQuery (project `sqlanvil`): PASS.**
+Isolated under a throwaway `sa_acceptance_bq` dataset, dropped after:
+- `init --warehouse bigquery`/`compile`/`run` end-to-end; reused the existing `sqlanvil-test@` SA key (`test_credentials/bigquery.json` doubles as the BigQuery `.df-credentials.json`).
+- Table with `bigquery: { partitionBy, clusterBy }` + description + columns (verified via INFORMATION_SCHEMA); view; incremental **MERGE** (idempotent on rerun); assertions passed; compile node selection.
+- **Named connections + `introspect`**: `connections.bq_src` in workflow_settings.yaml + `.df-credentials.json`; `introspect bq_src <table>` read the live schema → declaration with normalized `columnTypes`.
+
+**All three warehouse paths (Postgres, Supabase, BigQuery) now pass the real-user flow on 1.4.1.** Remaining: only granular sub-features already covered by integration tests (#21 partitioning, #19/#20 unit-test items).
 
 ## Test environments to have ready
 
