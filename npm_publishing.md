@@ -39,13 +39,15 @@ Free plan is sufficient — sqlanvil is OSS, no private packages needed.
 | :--- | :--- | :--- | :--- |
 | `@sqlanvil/cli` | `0.0.1` | 2026-05-27 | placeholder (name reservation) |
 | `@sqlanvil/core` | `0.0.1` | 2026-05-27 | placeholder (name reservation) |
-| `@sqlanvil/core` | `1.4.0` | 2026-06-16 | real (`latest`) — compile node selection |
-| `@sqlanvil/cli` | `1.4.0` | 2026-06-16 | real (`latest`) — compile node selection |
+| `@sqlanvil/core` | `1.4.0` | 2026-06-16 | real — compile node selection |
+| `@sqlanvil/cli` | `1.4.0` | 2026-06-16 | real — compile node selection |
+| `@sqlanvil/core` | `1.4.1` | 2026-06-16 | real (`latest`) — Postgres index-name + client-release fixes |
+| `@sqlanvil/cli` | `1.4.1` | 2026-06-16 | real (`latest`) — Postgres index-name + client-release fixes |
 
 The `0.0.1` rows are the original name-reservation placeholders (source not
 committed — one-shot scaffolding under `~/sqlanvil-npm-placeholders/` on Ivan's
 Mac); they were superseded by the first real `1.x` publish. The current
-published version of both packages is **`1.4.0`** (`latest`).
+published version of both packages is **`1.4.1`** (`latest`).
 
 ### Names to consider claiming later
 
