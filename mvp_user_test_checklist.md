@@ -45,7 +45,13 @@ Real-user flow, clean dir, no repo checkout; `sqlanvil 1.4.0 (Dataform core 3.0.
 - `--full-refresh`, `--schema-suffix` (sources not suffixed), run subsetting all work.
 - **Bugs found:** [#31] `postgres.indexes` without a `name` → `CREATE INDEX ""` fails (*zero-length delimited identifier*) — blocker; [#32] any failing statement double-releases the pg client (misleading stack trace before the real error).
 
-**Still to validate:** plain `postgres` cloud (managed, non-local) path, BigQuery path, Supabase real-project (Section 7).
+**2026-06-16 — published `@sqlanvil/cli@1.4.1` + real Supabase project (session pooler): PASS (Section 7).**
+Isolated under a throwaway `sa_acceptance` schema, dropped after:
+- Supabase warehouse path end-to-end (`init`/`compile`/`run`).
+- **RLS** policy created + enabled + **enforcement confirmed** (as `authenticated` with `request.jwt.claims.sub`, only the owner's row visible via `auth.uid()`); **realtime** publication membership; **vector index** (`hnsw`, `vector_cosine_ops`, `m=16`); **wrapper** (`bigquery_wrapper` FDW + `bq_server`). Second run idempotent.
+- Connection note: must use the **session pooler** host (direct `db.<ref>.supabase.co` has no DNS record → `ENOTFOUND`); the pooler endpoint is tenant-specific (`aws-1` here, `aws-0` returned `tenant not found`). CLI errors are clear + fail-fast.
+
+**Still to validate:** plain `postgres` cloud (managed, non-local) path, BigQuery path + named connections / `introspect`.
 
 ## Test environments to have ready
 
