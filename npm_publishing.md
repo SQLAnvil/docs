@@ -45,13 +45,15 @@ Free plan is sufficient — sqlanvil is OSS, no private packages needed.
 | `@sqlanvil/cli` | `1.4.1` | 2026-06-16 | real — Postgres index-name + client-release fixes |
 | `@sqlanvil/core` | `1.5.0` | 2026-06-17 | real — MySQL/MariaDB adapter |
 | `@sqlanvil/cli` | `1.5.0` | 2026-06-17 | real — MySQL/MariaDB adapter |
-| `@sqlanvil/core` | `1.6.0` | 2026-06-17 | real (`latest`) — MySQL `mysql:{}` block + COMMENT metadata + matview emulation |
-| `@sqlanvil/cli` | `1.6.0` | 2026-06-17 | real (`latest`) — MySQL `mysql:{}` block + COMMENT metadata + matview emulation |
+| `@sqlanvil/core` | `1.6.0` | 2026-06-17 | real — MySQL `mysql:{}` block + COMMENT metadata + matview emulation |
+| `@sqlanvil/cli` | `1.6.0` | 2026-06-17 | real — MySQL `mysql:{}` block + COMMENT metadata + matview emulation |
+| `@sqlanvil/core` | `1.7.0` | 2026-06-18 | real (`latest`) — `--environment` named environments |
+| `@sqlanvil/cli` | `1.7.0` | 2026-06-18 | real (`latest`) — `--environment` named environments |
 
 The `0.0.1` rows are the original name-reservation placeholders (source not
 committed — one-shot scaffolding under `~/sqlanvil-npm-placeholders/` on Ivan's
 Mac); they were superseded by the first real `1.x` publish. The current
-published version of both packages is **`1.6.0`** (`latest`).
+published version of both packages is **`1.7.0`** (`latest`).
 
 > **Gotcha (learned on 1.5.0):** the publishable tarball target is
 > `//packages/@sqlanvil/{core,cli}:package_tar` (produces `package.tar.gz`), **not**
