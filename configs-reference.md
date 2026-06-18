@@ -188,6 +188,30 @@ config {
 ```
 Supabase extends Postgres, so all `postgres: {}` fields apply too. Dedicated action types: `rlsPolicy`, `realtimePublication`, `wrapper`, `vectorIndex`.
 
+### Export action (`type: "export"`)
+
+Writes a SELECT result to a Parquet/CSV/JSON file. BigQuery compiles to native `EXPORT DATA`
+(`gs://` only); Postgres/Supabase export runner-side via DuckDB (`s3://`/`gs://`/local). See the
+[File Exports guide](exports.md).
+
+```sql
+config {
+  type: "export",
+  export: {
+    location: "s3://bucket/orders/",   -- folder/prefix URI (gs:// | s3:// | local:// | path)
+    format: "parquet",                  -- parquet | csv | json
+    overwrite: true,                    -- default true
+    filename: "orders",                 -- optional; defaults to action name
+    options: {}                         -- optional format passthrough
+  }
+}
+SELECT * FROM ${ref("orders")}
+```
+
+Object-store credentials live in a `storage` section of the gitignored `.df-credentials.json`
+(keyed by scheme — `s3`/`gcs`), used only by the DuckDB path; `local://` needs none and BigQuery
+uses its own GCS access.
+
 ---
 
 ## Cross-warehouse compatibility
@@ -202,5 +226,6 @@ Supabase extends Postgres, so all `postgres: {}` fields apply too. Dedicated act
 | `materialized` view | ✓ (auto-refresh) | ✓ (drop+recreate, opt-in REFRESH) | ✓ (same as Postgres) | ✓ (emulated: refreshed table snapshot) |
 | `supabase.enableRls` | ✗ | ✗ | ✓ | ✗ |
 | named `connections` (FDW sources) | source only | ✓ (read side) | ✓ (read side) | ✗ |
+| `type: "export"` (files) | ✓ (`EXPORT DATA`, gs:// only) | ✓ (DuckDB; s3/gs/local) | ✓ (DuckDB; incl. Supabase Storage) | ✗ |
 
 SQLAnvil emits a **compilation error** if a warehouse-specific config field is used against the wrong warehouse.

@@ -15,6 +15,7 @@ The published docs site is the best place to read these: **[sqlanvil.com/docs](h
 - `getting-started-supabase.md` — connect a SQLAnvil project to Supabase (install → init → connection details → first table)
 - `getting-started-mysql.md` — connect a SQLAnvil project to MySQL/MariaDB (install → init → credentials → first table → MySQL features)
 - `environments.md` — named dev/staging/prod environments via `--environment` (per-env overrides + credentials, secrets stay gitignored)
+- `exports.md` — `type: "export"` file exports to Parquet/CSV/JSON (BigQuery `EXPORT DATA`; Postgres/Supabase via DuckDB to s3/gs/local)
 - `named-connections.md` — read a BigQuery table as a live foreign table via named connections — the auto-generated FDW bridge
 - `claude-code.md` — use SQLAnvil with Claude Code: install the `sqlanvil-toolkit` plugin (the `sqlanvil-engineering-fundamentals` skill + slash commands)
 - `reference/` — generated API reference (regenerated from the code via `scripts/regenerate_docs` in the main repo)
