@@ -51,13 +51,15 @@ Free plan is sufficient — sqlanvil is OSS, no private packages needed.
 | `@sqlanvil/cli` | `1.7.0` | 2026-06-18 | real — `--environment` named environments |
 | `@sqlanvil/core` | `1.8.0` | 2026-06-18 | real — `type:"export"` file exports |
 | `@sqlanvil/cli` | `1.8.0` | 2026-06-18 | real — `type:"export"` file exports (+ duckdb dep) |
-| `@sqlanvil/core` | `1.8.1` | 2026-06-19 | real (`latest`) — multiline `rowConditions` BigQuery fix (#42) |
-| `@sqlanvil/cli` | `1.8.1` | 2026-06-19 | real (`latest`) — multiline `rowConditions` BigQuery fix (#42) |
+| `@sqlanvil/core` | `1.8.1` | 2026-06-19 | real — multiline `rowConditions` BigQuery fix (#42) |
+| `@sqlanvil/cli` | `1.8.1` | 2026-06-19 | real — multiline `rowConditions` BigQuery fix (#42) |
+| `@sqlanvil/core` | `1.8.2` | 2026-06-23 | real (`latest`) — upstream 3.0.60 sync: `AssertionConfig.metadata` (#2208) + vm2/protobufjs bumps |
+| `@sqlanvil/cli` | `1.8.2` | 2026-06-23 | real (`latest`) — upstream 3.0.60 sync: `AssertionConfig.metadata` (#2208) + vm2/protobufjs bumps |
 
 The `0.0.1` rows are the original name-reservation placeholders (source not
 committed — one-shot scaffolding under `~/sqlanvil-npm-placeholders/` on Ivan's
 Mac); they were superseded by the first real `1.x` publish. The current
-published version of both packages is **`1.8.1`** (`latest`).
+published version of both packages is **`1.8.2`** (`latest`).
 
 > **Gotcha (learned on 1.5.0):** the publishable tarball target is
 > `//packages/@sqlanvil/{core,cli}:package_tar` (produces `package.tar.gz`), **not**
