@@ -1,5 +1,3 @@
-[sqlanvil Javascript API Reference](../README.md) › [Globals](../globals.md) › ["core/session"](../modules/_core_session_.md) › [Session](_core_session_.session.md)
-
 # Class: Session
 
 Contains methods that are published globally, so can be invoked anywhere in the `/definitions`
@@ -13,16 +11,16 @@ folder of a sqlanvil project.
 
 ### Properties
 
-* [projectConfig](_core_session_.session.md#projectconfig)
+* [projectConfig](#projectconfig)
 
 ### Methods
 
-* [assert](_core_session_.session.md#assert)
-* [declare](_core_session_.session.md#declare)
-* [notebook](_core_session_.session.md#notebook)
-* [operate](_core_session_.session.md#operate)
-* [publish](_core_session_.session.md#publish)
-* [test](_core_session_.session.md#test)
+* [assert](#assert)
+* [declare](#declare)
+* [notebook](#notebook)
+* [operate](#operate)
+* [publish](#publish)
+* [test](#test)
 
 ## Properties
 
@@ -43,7 +41,7 @@ sqlanvil.projectConfig.vars.myVariableName === "myVariableValue"
 
 ###  assert
 
-▸ **assert**(`name`: string, `queryOrConfig?`: AContextable‹string› | AssertionConfig): *[Assertion](_core_actions_assertion_.assertion.md)*
+▸ **assert**(`name`: string, `queryOrConfig?`: AContextable‹string› | AssertionConfig): *[Assertion](assertion)*
 
 Adds a sqlanvil assertion the compiled graph.
 
@@ -58,13 +56,13 @@ Name | Type |
 `name` | string |
 `queryOrConfig?` | AContextable‹string› &#124; AssertionConfig |
 
-**Returns:** *[Assertion](_core_actions_assertion_.assertion.md)*
+**Returns:** *[Assertion](assertion)*
 
 ___
 
 ###  declare
 
-▸ **declare**(`config`: DeclarationConfig | any): *[Declaration](_core_actions_declaration_.declaration.md)*
+▸ **declare**(`config`: DeclarationConfig | any): *[Declaration](declaration)*
 
 Declares the dataset as a sqlanvil data source.
 
@@ -78,13 +76,13 @@ Name | Type |
 ------ | ------ |
 `config` | DeclarationConfig &#124; any |
 
-**Returns:** *[Declaration](_core_actions_declaration_.declaration.md)*
+**Returns:** *[Declaration](declaration)*
 
 ___
 
 ###  notebook
 
-▸ **notebook**(`config`: NotebookConfig): *[Notebook](_core_actions_notebook_.notebook.md)*
+▸ **notebook**(`config`: NotebookConfig): *[Notebook](notebook)*
 
 Creates a Notebook action.
 
@@ -98,13 +96,13 @@ Name | Type |
 ------ | ------ |
 `config` | NotebookConfig |
 
-**Returns:** *[Notebook](_core_actions_notebook_.notebook.md)*
+**Returns:** *[Notebook](notebook)*
 
 ___
 
 ###  operate
 
-▸ **operate**(`name`: string, `queryOrConfig?`: [Contextable](../modules/_core_contextables_.md#contextable)‹[IActionContext](../interfaces/_core_contextables_.iactioncontext.md), string | string[]› | OperationConfig): *[Operation](_core_actions_operation_.operation.md)*
+▸ **operate**(`name`: string, `queryOrConfig?`: Contextable‹IActionContext, string | string[]› | OperationConfig): *[Operation](operation)*
 
 Defines a SQL operation.
 
@@ -117,15 +115,15 @@ Available only in the `/definitions` directory.
 Name | Type |
 ------ | ------ |
 `name` | string |
-`queryOrConfig?` | [Contextable](../modules/_core_contextables_.md#contextable)‹[IActionContext](../interfaces/_core_contextables_.iactioncontext.md), string &#124; string[]› &#124; OperationConfig |
+`queryOrConfig?` | Contextable‹IActionContext, string &#124; string[]› &#124; OperationConfig |
 
-**Returns:** *[Operation](_core_actions_operation_.operation.md)*
+**Returns:** *[Operation](operation)*
 
 ___
 
 ###  publish
 
-▸ **publish**(`name`: string, `queryOrConfig?`: [Contextable](../modules/_core_contextables_.md#contextable)‹[ITableContext](../interfaces/_core_contextables_.itablecontext.md), string› | TableConfig | ViewConfig | IncrementalTableConfig | ILegacyTableConfig | any): *[Table](_core_actions_table_.table.md) | [IncrementalTable](_core_actions_incremental_table_.incrementaltable.md) | [View](_core_actions_view_.view.md)*
+▸ **publish**(`name`: string, `queryOrConfig?`: Contextable‹ITableContext, string› | TableConfig | ViewConfig | IncrementalTableConfig | ILegacyTableConfig | any): *[Table](table) | [IncrementalTable](incrementaltable) | [View](view)*
 
 Creates a table, view, or incremental table.
 
@@ -142,15 +140,15 @@ Available only in the `/definitions` directory.
 Name | Type |
 ------ | ------ |
 `name` | string |
-`queryOrConfig?` | [Contextable](../modules/_core_contextables_.md#contextable)‹[ITableContext](../interfaces/_core_contextables_.itablecontext.md), string› &#124; TableConfig &#124; ViewConfig &#124; IncrementalTableConfig &#124; ILegacyTableConfig &#124; any |
+`queryOrConfig?` | Contextable‹ITableContext, string› &#124; TableConfig &#124; ViewConfig &#124; IncrementalTableConfig &#124; ILegacyTableConfig &#124; any |
 
-**Returns:** *[Table](_core_actions_table_.table.md) | [IncrementalTable](_core_actions_incremental_table_.incrementaltable.md) | [View](_core_actions_view_.view.md)*
+**Returns:** *[Table](table) | [IncrementalTable](incrementaltable) | [View](view)*
 
 ___
 
 ###  test
 
-▸ **test**(`name`: string): *[Test](_core_actions_test_.test.md)*
+▸ **test**(`name`: string): *[Test](test)*
 
 Creates a Test action.
 
@@ -158,9 +156,9 @@ Available only in the `/definitions` directory.
 
 **`see`** [Test](Test) for examples on how to use.
 
-<!-- TODO(ekrekr): safely allow passing of config blocks as the second argument, similar to
-publish. -->
-<!-- TODO(ekrekr): add tests for this method -->
+<!-- This doesn't currently support passing of config blocks as the second argument, but it
+could in the future. -->
+<!-- Note: this action type isn't very thoroughly tested, so careful with changes -->
 
 **Parameters:**
 
@@ -168,4 +166,4 @@ Name | Type |
 ------ | ------ |
 `name` | string |
 
-**Returns:** *[Test](_core_actions_test_.test.md)*
+**Returns:** *[Test](test)*

@@ -43,23 +43,24 @@ This is where `input` and `expect` come from.
 
 ### Methods
 
-* [dataset](_core_actions_test_.test.md#dataset)
-* [expect](_core_actions_test_.test.md#expect)
-* [input](_core_actions_test_.test.md#input)
+* [dataset](#dataset)
+* [expect](#expect)
+* [input](#input)
 
 ## Methods
 
 ###  dataset
 
-▸ **dataset**(`ref`: [Resolvable](../modules/_core_contextables_.md#resolvable)): *this*
+▸ **dataset**(`ref`: Resolvable): *this*
 
-Sets the schema (BigQuery dataset / Postgres schema) in which to create the output of this action.
+Sets the schema (BigQuery dataset / Postgres schema) in which to create the output of this
+action.
 
 **Parameters:**
 
 Name | Type |
 ------ | ------ |
-`ref` | [Resolvable](../modules/_core_contextables_.md#resolvable) |
+`ref` | Resolvable |
 
 **Returns:** *this*
 
@@ -67,7 +68,7 @@ ___
 
 ###  expect
 
-▸ **expect**(`contextableQuery`: [Contextable](../modules/_core_contextables_.md#contextable)‹[IActionContext](../interfaces/_core_contextables_.iactioncontext.md), string›): *this*
+▸ **expect**(`contextableQuery`: Contextable‹IActionContext, string›): *this*
 
 Sets the expected output of the query to being tested against.
 
@@ -75,7 +76,7 @@ Sets the expected output of the query to being tested against.
 
 Name | Type |
 ------ | ------ |
-`contextableQuery` | [Contextable](../modules/_core_contextables_.md#contextable)‹[IActionContext](../interfaces/_core_contextables_.iactioncontext.md), string› |
+`contextableQuery` | Contextable‹IActionContext, string› |
 
 **Returns:** *this*
 
@@ -83,7 +84,7 @@ ___
 
 ###  input
 
-▸ **input**(`refName`: string | string[], `contextableQuery`: [Contextable](../modules/_core_contextables_.md#contextable)‹[IActionContext](../interfaces/_core_contextables_.iactioncontext.md), string›): *this*
+▸ **input**(`refName`: string | string[], `contextableQuery`: Contextable‹IActionContext, string›): *this*
 
 Sets the input query to unit test against.
 
@@ -92,6 +93,6 @@ Sets the input query to unit test against.
 Name | Type |
 ------ | ------ |
 `refName` | string &#124; string[] |
-`contextableQuery` | [Contextable](../modules/_core_contextables_.md#contextable)‹[IActionContext](../interfaces/_core_contextables_.iactioncontext.md), string› |
+`contextableQuery` | Contextable‹IActionContext, string› |
 
 **Returns:** *this*

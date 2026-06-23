@@ -1,5 +1,3 @@
-[sqlanvil Javascript API Reference](../README.md) › [Globals](../globals.md) › ["core/actions/notebook"](../modules/_core_actions_notebook_.md) › [Notebook](_core_actions_notebook_.notebook.md)
-
 # Class: Notebook
 
 Notebooks run Jupyter Notebook files, and can output content to the storage buckets defined in
@@ -45,13 +43,13 @@ notebook("name", { filename: "name.ipynb" })
 
 ### Methods
 
-* [ipynb](_core_actions_notebook_.notebook.md#ipynb)
+* [ipynb](#ipynb)
 
 ## Methods
 
 ###  ipynb
 
-▸ **ipynb**(`contents`: object): *[Notebook](_core_actions_notebook_.notebook.md)*
+▸ **ipynb**(`contents`: object): *Notebook*
 
 Sets or overrides the contents of the notebook to run. Not recommended in general; using
 separate `.ipynb` files for notebooks is preferred.
@@ -62,4 +60,4 @@ Name | Type |
 ------ | ------ |
 `contents` | object |
 
-**Returns:** *[Notebook](_core_actions_notebook_.notebook.md)*
+**Returns:** *Notebook*

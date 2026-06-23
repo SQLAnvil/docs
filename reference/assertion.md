@@ -73,9 +73,9 @@ This is where `query` comes from.
 **`deprecated`** Deprecated in favor of
 [AssertionConfig.project](configs#sqlanvil-ActionConfig-AssertionConfig).
 
-Sets the database in which to create the corresponding view for this assertion.
-For BigQuery targets this is the Google Cloud project ID; for Postgres/Supabase targets this
-is the database name configured in `workflow_settings.yaml`.
+Sets the database in which to create the corresponding view for this assertion. For BigQuery
+targets this is the Google Cloud project ID; for Postgres/Supabase targets this is the database
+name configured in `workflow_settings.yaml`.
 
 **Parameters:**
 
@@ -189,9 +189,9 @@ ___
 **`deprecated`** Deprecated in favor of
 [AssertionConfig.dataset](configs#sqlanvil-ActionConfig-AssertionConfig).
 
-Sets the schema in which to create the corresponding view for this assertion.
-For BigQuery targets this is the dataset name; for Postgres/Supabase targets this is the
-schema name (e.g. `public`).
+Sets the schema in which to create the corresponding view for this assertion. For BigQuery
+targets this is the dataset name; for Postgres/Supabase targets this is the schema name
+(e.g. `public`).
 
 **Parameters:**
 

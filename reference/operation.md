@@ -51,17 +51,17 @@ This is where `query` comes from.
 
 ### Methods
 
-* [columns](_core_actions_operation_.operation.md#columns)
-* [database](_core_actions_operation_.operation.md#database)
-* [dependencies](_core_actions_operation_.operation.md#dependencies)
-* [description](_core_actions_operation_.operation.md#description)
-* [disabled](_core_actions_operation_.operation.md#disabled)
-* [hasOutput](_core_actions_operation_.operation.md#hasoutput)
-* [hermetic](_core_actions_operation_.operation.md#hermetic)
-* [queries](_core_actions_operation_.operation.md#queries)
-* [schema](_core_actions_operation_.operation.md#schema)
-* [setDependOnDependencyAssertions](_core_actions_operation_.operation.md#setdependondependencyassertions)
-* [tags](_core_actions_operation_.operation.md#tags)
+* [columns](#columns)
+* [database](#database)
+* [dependencies](#dependencies)
+* [description](#description)
+* [disabled](#disabled)
+* [hasOutput](#hasoutput)
+* [hermetic](#hermetic)
+* [queries](#queries)
+* [schema](#schema)
+* [setDependOnDependencyAssertions](#setdependondependencyassertions)
+* [tags](#tags)
 
 ## Methods
 
@@ -91,8 +91,9 @@ ___
 **`deprecated`** Deprecated in favor of
 [OperationConfig.project](configs#sqlanvil-ActionConfig-OperationConfig).
 
-Sets the database (Google Cloud project ID) in which to create the corresponding view for this
-operation.
+Sets the database in which to create the corresponding view for this operation. For BigQuery
+targets this is the Google Cloud project ID; for Postgres/Supabase targets this is the database
+name in `workflow_settings.yaml`.
 
 **Parameters:**
 
@@ -106,7 +107,7 @@ ___
 
 ###  dependencies
 
-▸ **dependencies**(`value`: [Resolvable](../modules/_core_contextables_.md#resolvable) | [Resolvable](../modules/_core_contextables_.md#resolvable)[]): *this*
+▸ **dependencies**(`value`: Resolvable | Resolvable[]): *this*
 
 **`deprecated`** Deprecated in favor of
 [OperationConfig.dependencies](configs#sqlanvil-ActionConfig-OperationConfig).
@@ -117,7 +118,7 @@ Sets dependencies of the table.
 
 Name | Type |
 ------ | ------ |
-`value` | [Resolvable](../modules/_core_contextables_.md#resolvable) &#124; [Resolvable](../modules/_core_contextables_.md#resolvable)[] |
+`value` | Resolvable &#124; Resolvable[] |
 
 **Returns:** *this*
 
@@ -190,7 +191,7 @@ ___
 [OperationConfig.hermetic](configs#sqlanvil-ActionConfig-OperationConfig).
 
 If true, this indicates that the action only depends on data from explicitly-declared
-dependencies. Otherwise if false, it indicates that the  action depends on data from a source
+dependencies. Otherwise if false, it indicates that the action depends on data from a source
 which has not been declared as a dependency.
 
 **Parameters:**
@@ -205,17 +206,18 @@ ___
 
 ###  queries
 
-▸ **queries**(`queries`: [Contextable](../modules/_core_contextables_.md#contextable)‹[IActionContext](../interfaces/_core_contextables_.iactioncontext.md), string | string[]›): *this*
+▸ **queries**(`queries`: Contextable‹IActionContext, string | string[]›): *this*
 
 Sets the query/queries to generate the operation from.
 
-<!-- TODO(ekrekr): deprecated this in favor of a single `query(` method -->
+<!-- This is called queries for legacy reasons; now this could be better replaced as a single
+`query(` method -->
 
 **Parameters:**
 
 Name | Type |
 ------ | ------ |
-`queries` | [Contextable](../modules/_core_contextables_.md#contextable)‹[IActionContext](../interfaces/_core_contextables_.iactioncontext.md), string &#124; string[]› |
+`queries` | Contextable‹IActionContext, string &#124; string[]› |
 
 **Returns:** *this*
 
@@ -228,7 +230,8 @@ ___
 **`deprecated`** Deprecated in favor of
 [OperationConfig.dataset](configs#sqlanvil-ActionConfig-OperationConfig).
 
-Sets the schema (BigQuery dataset / Postgres schema) in which to create the output of this action.
+Sets the schema (BigQuery dataset / Postgres schema) in which to create the output of this
+action.
 
 **Parameters:**
 

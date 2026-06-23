@@ -50,8 +50,8 @@ declare("name")
 
 ### Methods
 
-* [columns](_core_actions_declaration_.declaration.md#columns)
-* [description](_core_actions_declaration_.declaration.md#description)
+* [columns](#columns)
+* [description](#description)
 
 ## Methods
 
