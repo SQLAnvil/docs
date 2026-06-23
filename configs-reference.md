@@ -98,6 +98,10 @@ config {
   database: "my_db",             -- overrides default project / database
   description: "My table.",      -- applied as a table COMMENT (BigQuery/Postgres/MySQL)
   columns: { id: "the id" },     -- per-column COMMENTs
+  metadata: {                    -- free-form descriptor metadata (table/view/incremental/assertion)
+    overview: "longer notes",
+    extraProperties: { owner: "analytics" }
+  },
   tags: ["daily", "core"],
   disabled: false,
   hermetic: true,
@@ -105,6 +109,11 @@ config {
   dependencies: ["other_table"]
 }
 ```
+
+`metadata` (an `overview` string + arbitrary `extraProperties`) attaches to the action's
+descriptor and is accepted on `table`, `view`, `incremental`, and `assertion` configs. Unlike
+`description`/`columns` (which become warehouse COMMENTs), `metadata` is carried in the compiled
+graph for tooling/lineage — it is not written to the warehouse.
 
 ### BigQuery-specific fields
 
