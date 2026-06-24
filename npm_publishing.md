@@ -169,6 +169,25 @@ npm publish ./sqlanvil-cli.tgz --access public --tag beta
 `npm i @sqlanvil/cli` users never receive it; testers opt in with
 `npm i @sqlanvil/cli@beta`. Publish `core` first, then `cli`.
 
+### 3.5. Tag + GitHub release (real releases only)
+
+npm is the primary channel, but the GitHub **Releases** page is the human-facing
+changelog and must be updated too — it does not auto-update from npm. Convention:
+a `v`-prefixed annotated tag on the **`chore(release): bump SQLANVIL_VERSION`
+commit** (not necessarily HEAD — later docs/tooling commits don't change the
+package), title `vX.Y.Z — <short desc>`, body with `## Added/Changed/Fixed/Security`
+sections + an `**Install:** npm i -g @sqlanvil/cli@X.Y.Z` line, marked `--latest`.
+
+```bash
+git tag -a vX.Y.Z <bump-commit> -m "vX.Y.Z — <short desc>"
+git push origin vX.Y.Z
+gh release create vX.Y.Z --verify-tag --latest \
+  --title "vX.Y.Z — <short desc>" --notes-file <notes.md>
+```
+
+(`gh release create --target <short-sha>` fails with "target_commitish is
+invalid" — push the tag first, then create the release with `--verify-tag`.)
+
 ## 4. Version Policy
 
 **sqlanvil has its own SemVer line, `SQLANVIL_VERSION`** (in `version.bzl`,
