@@ -57,13 +57,15 @@ Free plan is sufficient — sqlanvil is OSS, no private packages needed.
 | `@sqlanvil/cli` | `1.8.2` | 2026-06-23 | real — upstream 3.0.60 sync: `AssertionConfig.metadata` (#2208) + vm2/protobufjs bumps |
 | `@sqlanvil/core` | `1.8.3` | 2026-06-24 | real — MySQL pre/post-ops (#44) + DuckDB → `@duckdb/node-api` security migration (#40) |
 | `@sqlanvil/cli` | `1.8.3` | 2026-06-24 | real — MySQL pre/post-ops (#44) + DuckDB → `@duckdb/node-api` security migration (#40) |
-| `@sqlanvil/core` | `1.9.0` | 2026-06-24 | real (`latest`) — `sqlanvil validate` (pre-execution SQL validation, all 4 warehouses) + run --dry-run footgun fix |
-| `@sqlanvil/cli` | `1.9.0` | 2026-06-24 | real (`latest`) — `sqlanvil validate` (pre-execution SQL validation, all 4 warehouses) + run --dry-run footgun fix |
+| `@sqlanvil/core` | `1.9.0` | 2026-06-24 | real — `sqlanvil validate` (pre-execution SQL validation, all 4 warehouses) + run --dry-run footgun fix |
+| `@sqlanvil/cli` | `1.9.0` | 2026-06-24 | real — `sqlanvil validate` (pre-execution SQL validation, all 4 warehouses) + run --dry-run footgun fix |
+| `@sqlanvil/core` | `1.10.0` | 2026-06-24 | real (`latest`) — queryable Parquet artifacts + `query`/`inspect`/`docs` |
+| `@sqlanvil/cli` | `1.10.0` | 2026-06-24 | real (`latest`) — queryable Parquet artifacts + `query`/`inspect`/`docs` |
 
 The `0.0.1` rows are the original name-reservation placeholders (source not
 committed — one-shot scaffolding under `~/sqlanvil-npm-placeholders/` on Ivan's
 Mac); they were superseded by the first real `1.x` publish. The current
-published version of both packages is **`1.9.0`** (`latest`).
+published version of both packages is **`1.10.0`** (`latest`).
 
 > **Gotcha (learned on 1.5.0):** the publishable tarball target is
 > `//packages/@sqlanvil/{core,cli}:package_tar` (produces `package.tar.gz`), **not**
