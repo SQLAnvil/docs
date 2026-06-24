@@ -232,6 +232,7 @@ uses its own GCS access.
 | `mysql.indexes` / `mysql.engine` | ✗ | ✗ | ✗ | ✓ |
 | `labels` / `reservation` | ✓ | ✗ | ✗ | ✗ |
 | `description:` / `columns:` comments | ✓ | ✓ | ✓ | ✓ (tables only — not views) |
+| `pre_operations` / `post_operations` | ✓ | ✓ | ✓ | ✓ |
 | `materialized` view | ✓ (auto-refresh) | ✓ (drop+recreate, opt-in REFRESH) | ✓ (same as Postgres) | ✓ (emulated: refreshed table snapshot) |
 | `supabase.enableRls` | ✗ | ✗ | ✓ | ✗ |
 | named `connections` (FDW sources) | source only | ✓ (read side) | ✓ (read side) | ✗ |
