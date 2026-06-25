@@ -46,6 +46,8 @@
     - [MysqlConnection](#sqlanvil-MysqlConnection)
     - [MysqlOptions](#sqlanvil-MysqlOptions)
     - [MysqlOptions.Index](#sqlanvil-MysqlOptions-Index)
+    - [MysqlOptions.Partition](#sqlanvil-MysqlOptions-Partition)
+    - [MysqlOptions.Partition.Bound](#sqlanvil-MysqlOptions-Partition-Bound)
     - [NotebookRuntimeOptionsConfig](#sqlanvil-NotebookRuntimeOptionsConfig)
     - [PostgresConnection](#sqlanvil-PostgresConnection)
     - [PostgresOptions](#sqlanvil-PostgresOptions)
@@ -66,6 +68,7 @@
     - [ActionConfig.IcebergTableConfig.FileFormat](#sqlanvil-ActionConfig-IcebergTableConfig-FileFormat)
     - [ActionConfig.LoadMode](#sqlanvil-ActionConfig-LoadMode)
     - [ActionConfig.OnSchemaChange](#sqlanvil-ActionConfig-OnSchemaChange)
+    - [MysqlOptions.Partition.Kind](#sqlanvil-MysqlOptions-Partition-Kind)
     - [PostgresOptions.Index.Method](#sqlanvil-PostgresOptions-Index-Method)
     - [PostgresOptions.Partition.Kind](#sqlanvil-PostgresOptions-Partition-Kind)
     - [SupabaseOptions.VectorConfig.IndexType](#sqlanvil-SupabaseOptions-VectorConfig-IndexType)
@@ -823,7 +826,7 @@ A named connection: the warehouse (read/write target) or a read-only source.
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| platform | [string](#string) |  | Optional. One of &#34;bigquery&#34;, &#34;postgres&#34;, &#34;supabase&#34;. |
+| platform | [string](#string) |  | Optional. One of &#34;bigquery&#34;, &#34;postgres&#34;, &#34;supabase&#34;, &#34;mysql&#34;. (&#34;mysql&#34; is supported by `sqlanvil introspect` for schema scaffolding; a runtime cross-warehouse MySQL *source* bridge is not yet implemented — see issue #35.) |
 | project | [string](#string) |  | Optional. BigQuery source default project. |
 | dataset | [string](#string) |  | Optional. BigQuery source default dataset. |
 | saKeyId | [string](#string) |  | Optional. Non-secret Vault secret id used in generated BigQuery FDW server DDL. |
@@ -925,6 +928,7 @@ SPATIAL/prefix indexes, or row_format yet — those are later follow-ups.)
 | charset | [string](#string) |  | Default character set, emitted as DEFAULT CHARSET=&lt;charset&gt; (e.g. &#34;utf8mb4&#34;). |
 | collation | [string](#string) |  | Default collation, emitted as COLLATE=&lt;collation&gt; (e.g. &#34;utf8mb4_unicode_ci&#34;). |
 | indexes | [MysqlOptions.Index](#sqlanvil-MysqlOptions-Index) | repeated |  |
+| partition | [MysqlOptions.Partition](#sqlanvil-MysqlOptions-Partition) |  |  |
 
 
 
@@ -942,6 +946,44 @@ SPATIAL/prefix indexes, or row_format yet — those are later follow-ups.)
 | name | [string](#string) |  | Optional; when omitted, derived as &lt;table&gt;_&lt;cols&gt;_idx (or _key if unique), capped at 63 chars. |
 | columns | [string](#string) | repeated |  |
 | unique | [bool](#bool) |  |  |
+
+
+
+
+
+
+<a name="sqlanvil-MysqlOptions-Partition"></a>
+
+### MysqlOptions.Partition
+Native MySQL/MariaDB partitioning. NB: MySQL requires every column used in the
+partitioning expression to be part of every UNIQUE/PRIMARY key — so a partitioned
+incremental table&#39;s `uniqueKey` must include the partition column(s).
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| kind | [MysqlOptions.Partition.Kind](#sqlanvil-MysqlOptions-Partition-Kind) |  |  |
+| expression | [string](#string) |  | The expression/columns inside `PARTITION BY &lt;kind&gt; (...)`, emitted verbatim. For RANGE/LIST: a column or expression (e.g. &#34;id&#34;, &#34;YEAR(created_at)&#34;). For HASH/KEY: a column list. (RANGE COLUMNS / LIST COLUMNS not modeled in v1.) |
+| partitions | [MysqlOptions.Partition.Bound](#sqlanvil-MysqlOptions-Partition-Bound) | repeated |  |
+| count | [uint32](#uint32) |  | HASH/KEY partition count, emitted as `PARTITIONS &lt;n&gt;`. Ignored for RANGE/LIST. |
+
+
+
+
+
+
+<a name="sqlanvil-MysqlOptions-Partition-Bound"></a>
+
+### MysqlOptions.Partition.Bound
+RANGE/LIST child partitions. `values` is the raw clause body after the name,
+e.g. &#34;VALUES LESS THAN (2024)&#34; (range, use MAXVALUE for a catch-all) or
+&#34;VALUES IN (&#39;us&#39;, &#39;ca&#39;)&#34; (list).
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| name | [string](#string) |  |  |
+| values | [string](#string) |  |  |
 
 
 
@@ -1314,6 +1356,20 @@ Supported file formats for BigQuery tables.
 | FAIL | 1 | Fails if the query would result in a new column(s) being added, deleted, or renamed. |
 | EXTEND | 2 | Does not block any new column(s) from being added. |
 | SYNCHRONIZE | 3 | Does not block any new column(s) from being added, deleted or renamed. |
+
+
+
+<a name="sqlanvil-MysqlOptions-Partition-Kind"></a>
+
+### MysqlOptions.Partition.Kind
+
+
+| Name | Number | Description |
+| ---- | ------ | ----------- |
+| RANGE | 0 |  |
+| LIST | 1 |  |
+| HASH | 2 |  |
+| KEY | 3 |  |
 
 
 
