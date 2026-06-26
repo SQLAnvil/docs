@@ -17,6 +17,9 @@
     - [ActionConfig.ForeignWrapperConfig](#sqlanvil-ActionConfig-ForeignWrapperConfig)
     - [ActionConfig.ForeignWrapperConfig.OptionsEntry](#sqlanvil-ActionConfig-ForeignWrapperConfig-OptionsEntry)
     - [ActionConfig.IcebergTableConfig](#sqlanvil-ActionConfig-IcebergTableConfig)
+    - [ActionConfig.ImportConfig](#sqlanvil-ActionConfig-ImportConfig)
+    - [ActionConfig.ImportOptions](#sqlanvil-ActionConfig-ImportOptions)
+    - [ActionConfig.ImportOptions.OptionsEntry](#sqlanvil-ActionConfig-ImportOptions-OptionsEntry)
     - [ActionConfig.IncrementalTableConfig](#sqlanvil-ActionConfig-IncrementalTableConfig)
     - [ActionConfig.IncrementalTableConfig.AdditionalOptionsEntry](#sqlanvil-ActionConfig-IncrementalTableConfig-AdditionalOptionsEntry)
     - [ActionConfig.IncrementalTableConfig.LabelsEntry](#sqlanvil-ActionConfig-IncrementalTableConfig-LabelsEntry)
@@ -105,6 +108,7 @@ Action config defines the contents of `actions.yaml` configuration files.
 | foreignWrapper | [ActionConfig.ForeignWrapperConfig](#sqlanvil-ActionConfig-ForeignWrapperConfig) |  |  |
 | vectorIndex | [ActionConfig.VectorIndexConfig](#sqlanvil-ActionConfig-VectorIndexConfig) |  |  |
 | export | [ActionConfig.ExportConfig](#sqlanvil-ActionConfig-ExportConfig) |  |  |
+| import | [ActionConfig.ImportConfig](#sqlanvil-ActionConfig-ImportConfig) |  |  |
 
 
 
@@ -345,6 +349,65 @@ The user-facing `export: {}` block on a `type: &#34;export&#34;` action.
 | bucketName | [string](#string) |  | The name of the Cloud Storage bucket where table data is stored. This value is be used to construct the storage URI in the following way: `gs://{bucket_name}/{table_folder_root}/{table_folder_subpath}``. If `storage_uri` is provided, this value is ignored. |
 | tableFolderRoot | [string](#string) |  | The name of the first-level folder inside the Cloud Storage bucket where table data is stored. This value will be used to construct the storage URI in the following way: `gs://{bucket_name}/{table_folder_root}/{table_folder_subpath}``. If `storage_uri` is provided, this value is ignored. |
 | tableFolderSubpath | [string](#string) |  | The path under the first-level folder of the Cloud Storage bucket where table data is stored. This value will be used to construct the storage URI in the following way: `gs://{bucket_name}/{table_folder_root}/{table_folder_subpath}``. If `storage_uri` is provided, this value is ignored. |
+
+
+
+
+
+
+<a name="sqlanvil-ActionConfig-ImportConfig"></a>
+
+### ActionConfig.ImportConfig
+Configuration for a `type: &#34;import&#34;` action: loads a Parquet/CSV/JSON file into a table in
+the warehouse (the inverse of `type: &#34;export&#34;`). The resulting table is ref()-able.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| name | [string](#string) |  | The name of the import (the destination table name). |
+| dataset | [string](#string) |  | The dataset (schema) used to qualify the import&#39;s target name. |
+| project | [string](#string) |  | The Google Cloud project (database) of the import. |
+| dependencyTargets | [ActionConfig.Target](#sqlanvil-ActionConfig-Target) | repeated | Targets of actions that this action is dependent on. |
+| filename | [string](#string) |  | Path to the source .sqlx file the action is defined in (generated). |
+| tags | [string](#string) | repeated | A list of user-defined tags with which the action should be labeled. |
+| disabled | [bool](#bool) |  | If set to true, this action will not be executed. |
+| description | [string](#string) |  | Description of the import. |
+| hermetic | [bool](#bool) |  | If true, this action only depends on data from explicitly-declared dependencies. |
+| import | [ActionConfig.ImportOptions](#sqlanvil-ActionConfig-ImportOptions) |  | The import source &#43; format options (the `import: {}` block). |
+
+
+
+
+
+
+<a name="sqlanvil-ActionConfig-ImportOptions"></a>
+
+### ActionConfig.ImportOptions
+The user-facing `import: {}` block on a `type: &#34;import&#34;` action.
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| location | [string](#string) |  | Source file/glob/URI to read: gs:// | s3:// | local:// | relative/absolute path. Used verbatim (unlike export, where the filename is derived) — point it at the exact file or glob (e.g. gs://bucket/orders/*.parquet). |
+| format | [string](#string) |  | &#34;parquet&#34; | &#34;csv&#34; | &#34;json&#34; (json = JSONL). |
+| overwrite | [bool](#bool) |  | Replace the destination table (drop &#43; create). Defaults to true. When false, rows are appended (INSERT … SELECT) into an existing table. |
+| options | [ActionConfig.ImportOptions.OptionsEntry](#sqlanvil-ActionConfig-ImportOptions-OptionsEntry) | repeated | Format-specific passthrough options (reserved for future reader options). |
+
+
+
+
+
+
+<a name="sqlanvil-ActionConfig-ImportOptions-OptionsEntry"></a>
+
+### ActionConfig.ImportOptions.OptionsEntry
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| key | [string](#string) |  |  |
+| value | [string](#string) |  |  |
 
 
 
