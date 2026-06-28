@@ -1,27 +1,32 @@
-# SQLAnvil Docs
+# SQLAnvil — Design & Contributor Docs
 
-Reference docs and design documents for [SQLAnvil](https://github.com/sqlanvil/sqlanvil) — the SQL workflow tool for BigQuery, PostgreSQL, Supabase, and MySQL/MariaDB.
+Internal **design specs, contributor guides, and release runbooks** for
+[SQLAnvil](https://github.com/sqlanvil/sqlanvil) — the SQL workflow tool for BigQuery, PostgreSQL,
+Supabase, and MySQL/MariaDB.
 
-The published docs site is the best place to read these: **[sqlanvil.com/docs](https://sqlanvil.com/docs/)**.
+> **Looking for user docs?** They've moved. **User-facing documentation now lives in one place:
+> [sqlanvil.com/docs](https://sqlanvil.com/docs/)** (source in the `sqlanvil-com` repo). Getting-started
+> guides, the per-warehouse guides, packages, named connections, and the generated reference are all
+> there. This repo no longer holds user docs — keeping them in one canonical home avoids drift.
 
 ## Links
 
 - **Code** — [github.com/sqlanvil/sqlanvil](https://github.com/sqlanvil/sqlanvil)
+- **User docs** — [sqlanvil.com/docs](https://sqlanvil.com/docs/) (source: `sqlanvil-com`)
 - **Website** — [sqlanvil.com](https://sqlanvil.com)
-- **Docs** — [sqlanvil.com/docs](https://sqlanvil.com/docs/)
 
-## In this repo
+## In this repo (design & contributor docs only)
 
-- `getting-started-supabase.md` — connect a SQLAnvil project to Supabase (install → init → connection details → first table)
-- `getting-started-mysql.md` — connect a SQLAnvil project to MySQL/MariaDB (install → init → credentials → first table → MySQL features)
-- `environments.md` — named dev/staging/prod environments via `--environment` (per-env overrides + credentials, secrets stay gitignored)
-- `exports.md` — `type: "export"` file exports to Parquet/CSV/JSON (BigQuery `EXPORT DATA`; Postgres/Supabase via DuckDB to s3/gs/local)
-- `named-connections.md` — read a BigQuery table as a live foreign table via named connections — the auto-generated FDW bridge
-- `claude-code.md` — use SQLAnvil with Claude Code: install the `sqlanvil-toolkit` plugin (the `sqlanvil-engineering-fundamentals` skill + slash commands)
-- `reference/` — generated API reference (regenerated from the code via `scripts/regenerate_docs` in the main repo)
-- `configs-reference.md`, `packages.md` — configuration and package reference
-- `npm_publishing.md`, `upstream_merge_guide.md` — release & upstream-sync runbooks
-- `gcp_test_project_setup.md` — runbook for setting up a GCP project to run the BigQuery integration tests
-- `mvp_user_test_checklist.md` — by-hand real-user acceptance checklist (can a typical user install, configure, author, and run a project?)
-- `v2_roadmap.md` — post-V1 feature backlog (more databases, file sources, Dataform→SQLAnvil conversion, interactive `init`)
-- Design documents — `postgres_first_class_design.md`, `postgres_reintegration_assessment.md`, `hybrid_warehouses_supabase_bigquery.md`, and others
+- `postgres_first_class_design.md` — design spec: Postgres as a first-class (non-BigQuery) adapter
+- `postgres_reintegration_assessment.md` — technical assessment for the Postgres adapter reintegration (archival)
+- `hybrid_warehouses_supabase_bigquery.md` — design doc: hybrid Supabase + BigQuery workflows
+- `v2_roadmap.md` — post-V1 feature backlog
+- `upstream_merge_guide.md` — runbook: merging upstream Dataform changes into the fork
+- `npm_publishing.md` — runbook: the npm publish/release process
+- `gcp_test_project_setup.md` — runbook: setting up a GCP project for the BigQuery integration tests
+- `mvp_user_test_checklist.md` — by-hand real-user acceptance checklist
+- `rename_checklist.md`, `rename_handoff.md` — artifacts from the Dataform → SQLAnvil rename
+- `claude-code.md` — using SQLAnvil with Claude Code (AI-agent authoring guidance)
+
+> Generated API/config reference is produced by `scripts/regenerate_docs` in the main repo and now
+> publishes **directly into `sqlanvil-com`** (no longer mirrored here).
