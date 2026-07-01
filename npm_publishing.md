@@ -116,11 +116,21 @@ from the registry (triggered by `sqlanvilCoreVersion:` in
 `workflow_settings.yaml`). To validate that flow end-to-end the package must
 be on npm — publish a beta (§3.4), never the real version, for testing.
 
-### 3.1. Build the tarball inside Docker
+### 3.1. Build the tarball
 
-Native macOS Bazel is currently broken on this host (the `wrapped_clang`
-toolchain hits a dyld `LC_UUID` error when compiling protobuf's C++), so all
-builds go through `scripts/docker-bazel` (Linux toolchain):
+**As of 2026-07-01, native macOS Bazel works again** — build directly:
+
+```bash
+cd ~/projects-ivan/sqlanvil
+bazel build //packages/@sqlanvil/cli:package_tar //packages/@sqlanvil/core:package_tar
+# Output: bazel-bin/packages/@sqlanvil/{cli,core}/package.tar.gz (real path, cp-able from the host)
+```
+
+The old `wrapped_clang`/dyld `LC_UUID` protobuf-C++ breakage self-resolved via a macOS/CLT update
+(`.bazelversion` is unchanged at 5.4.0). Verified with a forced `--compilation_mode=opt` recompile.
+
+**Fallback — `scripts/docker-bazel` (Linux toolchain)**, kept for CI/reproducibility or if native breaks
+again on a future macOS:
 
 ```bash
 cd ~/projects-ivan/sqlanvil
