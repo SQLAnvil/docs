@@ -80,6 +80,7 @@ If your application needs to display high-level analytical results (computed in 
 1. **Model in BigQuery:** Use SQLAnvil to process high-compute metrics in BigQuery (e.g., predicting customer churn risk or computing multi-month cohort retention).
 2. **Expose in Supabase:**
    * Declare the BigQuery table as a [named connection](./named-connections.md) — SQLAnvil enables the wrapper, creates the foreign server, and exposes a `ref()`-able foreign table for you (no hand-written wrapper).
+   * **Cross-project sources (1.13.0):** BigQuery bills the FDW query to the server's project. To read a dataset you can read but not bill (e.g. `bigquery-public-data`), set `billingProject` on the connection to your own GCP project — SQLAnvil bills yours and reads the source via a full-FQN subquery (SA needs `bigquery.jobUser` on the billing project). Without it, the query 403s with `bigquery.jobs.create` denied.
    * Downstream SQLAnvil models join or materialize it like any other source.
    * Your frontend web/mobile application can query the result instantly using standard Supabase client SDKs (`supabase.from('churn_predictions')`).
 
