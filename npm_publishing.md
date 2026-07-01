@@ -179,19 +179,37 @@ npm publish ./sqlanvil-cli.tgz --access public --tag beta
 `npm i @sqlanvil/cli` users never receive it; testers opt in with
 `npm i @sqlanvil/cli@beta`. Publish `core` first, then `cli`.
 
-### 3.5. Tag + GitHub release (real releases only)
+### 3.5. Tag + GitHub release (real releases only) — **use the script**
 
 npm is the primary channel, but the GitHub **Releases** page is the human-facing
-changelog and must be updated too — it does not auto-update from npm. Convention:
-a `v`-prefixed annotated tag on the **`chore(release): bump SQLANVIL_VERSION`
-commit** (not necessarily HEAD — later docs/tooling commits don't change the
-package), title `vX.Y.Z — <short desc>`, body with `## Added/Changed/Fixed/Security`
-sections + an `**Install:** npm i -g @sqlanvil/cli@X.Y.Z` line, marked `--latest`.
+changelog and must be updated too — it does not auto-update from npm. **This step
+was forgotten on 1.8.2 AND 1.13.0** (GitHub kept showing the prior version until
+noticed), so it's automated:
 
 ```bash
-git tag -a vX.Y.Z <bump-commit> -m "vX.Y.Z — <short desc>"
+cd ~/projects-ivan/sqlanvil
+./scripts/release_github            # releases the version in version.bzl
+# DRY_RUN=1 ./scripts/release_github   # preview first (touches nothing)
+```
+
+The script reads `SQLANVIL_VERSION`, pulls the title + body from the
+`sqlanvil-com` `whats-new.md` `## X.Y.Z` section (absolutising `/docs` links and
+appending the Install line), finds the `release: SQLAnvil X.Y.Z` commit, creates
++ pushes the canonical **`vX.Y.Z`** tag, and runs `gh release create … --latest`.
+It's **idempotent** — re-run to fix a title/notes typo (it updates the existing
+release). **Prereq:** add the release's `## X.Y.Z` entry to `whats-new.md` first
+(part of the docs step this runbook already requires).
+
+**Tag convention:** `vX.Y.Z` is sqlanvil's canonical release tag. The bare
+`X.Y.Z` tags (up to 1.22.2, past our current version) are **inherited upstream
+Dataform tags** — leave them; do not delete or release from them.
+
+Manual fallback (what the script runs), if `gh`/whats-new isn't available:
+
+```bash
+git tag -a vX.Y.Z <release-commit> -m "vX.Y.Z — <short desc>"
 git push origin vX.Y.Z
-gh release create vX.Y.Z --verify-tag --latest \
+gh release create vX.Y.Z --repo SQLAnvil/sqlanvil --verify-tag --latest \
   --title "vX.Y.Z — <short desc>" --notes-file <notes.md>
 ```
 
