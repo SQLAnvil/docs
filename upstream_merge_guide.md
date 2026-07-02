@@ -6,7 +6,17 @@ This guide outlines a highly robust, sandboxed process for pulling, merging, and
 
 ## 0. Last Sync & The One Key Principle
 
-**Last synced:** upstream **`3.0.59`** → `main` on 2026-06-03 (merge commit `dfeb1e5d`). The local `dataform` branch mirrors the upstream release tag; each sync advances `main`'s merge-base with upstream, so the next merge only sees *new* commits.
+**Last synced:** upstream **`3.0.61`** → `main` on 2026-07-02 (merge commit `e12ee80f`). This sync also
+adopted the **bzlmod migration** (upstream #2187, issue #41): Bazel **5.4.0 → 7.3.2**, new `MODULE.bazel` +
+`MODULE.bazel.lock`, `WORKSPACE` trimmed to just `build_bazel_rules_nodejs`. All the `df`/`_main` workspace-name
+references were adapted to **`sa`** (`MODULE.bazel` `module(name)`, `tools/ts_library.bzl` `module_name`,
+`tools/ts_proto_library.bzl` `workspace_name` fallback, `protos/BUILD` `module_name`, both `webpack.config.js`
+aliases, `cli/index_test_base.ts` runfiles path). **macOS gotchas fixed:** (1) upstream's `sed -i` in
+`ts_proto_library.bzl` broke native BSD sed → made portable (temp-file + mv); (2) `bazel build //...` needs
+`--config=macos-cpp` (ccache bypass + abseil `-Wno-deprecated-builtins`) to compile the C++ protoc tool — the
+TS deliverables (core/cli/packages/tests) build without it. Prior sync: 3.0.59 → main 2026-06-03 (`dfeb1e5d`);
+`DF_VERSION` had been bumped to 3.0.60 without a code merge. The local `dataform` branch mirrors the upstream
+release tag; each sync advances `main`'s merge-base with upstream, so the next merge only sees *new* commits.
 
 > **The #1 lesson: the Bazel build — not grep — is the source of truth for rename leftovers.** Git auto-merges most upstream changes cleanly, but those auto-merged regions carry upstream `dataform.` / `df/` / `@dataform/` / `__dataform_*` tokens that produce **no conflict markers** yet still break the renamed fork. `tsc` (via Bazel) flags every one. Grep is unreliable here: macOS BSD grep silently no-ops on `\bword\b` and on `-r` given an explicit file list. **Finish every sync by building, fixing what tsc reports, and rebuilding — never trust a clean grep alone.**
 
