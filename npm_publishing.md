@@ -65,11 +65,13 @@ Free plan is sufficient — sqlanvil is OSS, no private packages needed.
 | `@sqlanvil/cli` | `1.11.0` | 2026-06-25 | real — MySQL native partitioning (#45) + MySQL `introspect` (#35) |
 | `@sqlanvil/core` | `1.12.0` | 2026-06-26 | real (`latest`) — `type:"import"` file import (DuckDB bridge / BigQuery LOAD DATA) |
 | `@sqlanvil/cli` | `1.12.0` | 2026-06-26 | real (`latest`) — `type:"import"` file import (DuckDB bridge / BigQuery LOAD DATA) |
+| both | `1.13.0`–`1.23.0` | 2026-06-27 → 2026-07-07 | real — per-release notes on [GitHub Releases](https://github.com/SQLAnvil/sqlanvil/releases) / whats-new (this table stopped being row-per-release at 1.12) |
+| both | `1.24.0` | 2026-07-16 | real (`latest`) — `migrate-dataform --target-warehouse bigquery` (tooling swap) + scaffolded AGENTS.md/CLAUDE.md in generated projects |
 
 The `0.0.1` rows are the original name-reservation placeholders (source not
 committed — one-shot scaffolding under `~/sqlanvil-npm-placeholders/` on Ivan's
 Mac); they were superseded by the first real `1.x` publish. The current
-published version of both packages is **`1.12.0`** (`latest`).
+published version of both packages is **`1.24.0`** (`latest`).
 
 > **Gotcha (learned on 1.5.0):** the publishable tarball target is
 > `//packages/@sqlanvil/{core,cli}:package_tar` (produces `package.tar.gz`), **not**
