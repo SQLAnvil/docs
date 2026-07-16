@@ -226,6 +226,23 @@ gh release create vX.Y.Z --repo SQLAnvil/sqlanvil --verify-tag --latest \
 (`gh release create --target <short-sha>` fails with "target_commitish is
 invalid" — push the tag first, then create the release with `--verify-tag`.)
 
+### 3.6. Release sync checklist (every real release)
+
+All of these move together with the version bump — none are optional:
+
+1. **`sqlanvil-com`** — `whats-new.md` `## X.Y.Z` entry (BEFORE `release_github`;
+   the script reads it), affected guide pages, reference regen if protos/JSDoc
+   changed (`regenerate_docs`).
+2. **Engine `AGENTS.md`** — version pins + new deltas (contributor-facing canonical).
+3. **`SQLAnvil/agent-skills`** (public repo, local checkout
+   `~/projects-ivan/sqlanvil-agent-skills`) —
+   `skills/sqlanvil-engineering-fundamentals/SKILL.md` version pins + new deltas.
+   This is the **public canonical** skill (`npx skills add SQLAnvil/agent-skills`);
+   the old personal claude-skills copy is a retired stub. Content-review against
+   the release notes, not a blind copy of AGENTS.md (different scopes). Commit + push.
+4. **SQLAnvil Cloud** — `SCAFFOLD_CORE_VERSION` in `apps/web/lib/scaffold.ts`,
+   runner Dockerfile CLI pin, rebuild + deploy the runner image.
+
 ## 4. Version Policy
 
 **sqlanvil has its own SemVer line, `SQLANVIL_VERSION`** (in `version.bzl`,
