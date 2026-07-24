@@ -1,7 +1,7 @@
 # npm Publishing
 
 **Status:** Reference / runbook
-**Last updated:** 2026-06-03
+**Last updated:** 2026-07-24
 
 ## 0. TL;DR
 
@@ -67,11 +67,18 @@ Free plan is sufficient — sqlanvil is OSS, no private packages needed.
 | `@sqlanvil/cli` | `1.12.0` | 2026-06-26 | real (`latest`) — `type:"import"` file import (DuckDB bridge / BigQuery LOAD DATA) |
 | both | `1.13.0`–`1.23.0` | 2026-06-27 → 2026-07-07 | real — per-release notes on [GitHub Releases](https://github.com/SQLAnvil/sqlanvil/releases) / whats-new (this table stopped being row-per-release at 1.12) |
 | both | `1.24.0` | 2026-07-16 | real (`latest`) — `migrate-dataform --target-warehouse bigquery` (tooling swap) + scaffolded AGENTS.md/CLAUDE.md in generated projects |
+| both | `1.25.0` | 2026-07-24 | real (`latest`) — scaffolded AGENTS.md metadata-for-AI/BI section + npm page metadata (homepage sqlanvil.com, repository/bugs, absolute README links) |
 
 The `0.0.1` rows are the original name-reservation placeholders (source not
 committed — one-shot scaffolding under `~/sqlanvil-npm-placeholders/` on Ivan's
 Mac); they were superseded by the first real `1.x` publish. The current
-published version of both packages is **`1.24.0`** (`latest`).
+published version of both packages is **`1.25.0`** (`latest`).
+
+> **Gotcha (learned on 1.25.0):** npm ≥11 rejects the Bazel tarball with
+> `E415 … invalid path: package/` — the tar contains a bare `package/` directory
+> entry that older npm tolerated. Workaround: extract the tarball and publish the
+> extracted `package/` **directory** (`cd package && npm publish --access public`);
+> npm packs it itself, identical content.
 
 > **Gotcha (learned on 1.5.0):** the publishable tarball target is
 > `//packages/@sqlanvil/{core,cli}:package_tar` (produces `package.tar.gz`), **not**
