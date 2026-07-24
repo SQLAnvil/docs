@@ -74,11 +74,14 @@ committed — one-shot scaffolding under `~/sqlanvil-npm-placeholders/` on Ivan'
 Mac); they were superseded by the first real `1.x` publish. The current
 published version of both packages is **`1.25.0`** (`latest`).
 
-> **Gotcha (learned on 1.25.0):** npm ≥11 rejects the Bazel tarball with
-> `E415 … invalid path: package/` — the tar contains a bare `package/` directory
-> entry that older npm tolerated. Workaround: extract the tarball and publish the
-> extracted `package/` **directory** (`cd package && npm publish --access public`);
-> npm packs it itself, identical content.
+> **Gotcha (learned on 1.25.0, FIXED at source):** npm ≥11 rejects tarballs
+> containing a bare `package/` directory entry with `E415 … invalid path:
+> package/`. The `pkg_npm_tar` genrule (`packages/index.bzl`) now archives the
+> file list instead of the directory (sqlanvil `9fc42f67`), so `npm publish
+> ./package.tar.gz` works again from 1.26 builds onward. If E415 ever reappears
+> (e.g. building from an older checkout), the workaround is to extract the
+> tarball and publish the extracted `package/` **directory** — npm packs it
+> itself, identical content.
 
 > **Gotcha (learned on 1.5.0):** the publishable tarball target is
 > `//packages/@sqlanvil/{core,cli}:package_tar` (produces `package.tar.gz`), **not**
