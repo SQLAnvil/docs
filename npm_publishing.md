@@ -72,12 +72,13 @@ Free plan is sufficient — sqlanvil is OSS, no private packages needed.
 | both | `1.25.2` | 2026-07-25 | real — validate self-reference fix (#49): self() → production relation; ops dry-run against fresh stub (BQ); PG no longer EXPLAINs DDL ops |
 | both | `1.26.0` | 2026-07-25 | real — BQ migrate/init: Dataform-parity auth (generated secretless ADC creds; interactive auth step) + scaffolded test environment (run --environment test before production) |
 | both | `1.26.1` | 2026-07-25 | real — migrate generates scripts/introspect_all.sh (every concrete introspect command) |
-| both | `1.26.2` | 2026-07-26 | real (`latest`) — introspect: BigQuery connections fall back to ADC (no .df-credentials.json required) |
+| both | `1.26.2` | 2026-07-26 | real — introspect: BigQuery connections fall back to ADC (no .df-credentials.json required) |
+| both | `1.27.0` | 2026-07-26 | real (`latest`) — declarations inert until referenced (unreferenced runner-extract declarations pruned from graph; Dataform parity) + resilient generated introspect_all.sh (collect failures, summarize) |
 
 The `0.0.1` rows are the original name-reservation placeholders (source not
 committed — one-shot scaffolding under `~/sqlanvil-npm-placeholders/` on Ivan's
 Mac); they were superseded by the first real `1.x` publish. The current
-published version of both packages is **`1.26.2`** (`latest`).
+published version of both packages is **`1.27.0`** (`latest`).
 
 > **Gotcha (learned on 1.25.0, FIXED at source):** npm ≥11 rejects tarballs
 > containing a bare `package/` directory entry with `E415 … invalid path:
