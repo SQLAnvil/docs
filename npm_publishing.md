@@ -70,12 +70,12 @@ Free plan is sufficient — sqlanvil is OSS, no private packages needed.
 | both | `1.25.0` | 2026-07-24 | real — scaffolded AGENTS.md metadata-for-AI/BI section + npm page metadata (homepage sqlanvil.com, repository/bugs, absolute README links) |
 | both | `1.25.1` | 2026-07-25 | real — config-strictness: clear per-file error for object/array in scalar config fields (was a compile crash at proto encode) |
 | both | `1.25.2` | 2026-07-25 | real — validate self-reference fix (#49): self() → production relation; ops dry-run against fresh stub (BQ); PG no longer EXPLAINs DDL ops |
-| both | `1.26.0` | 2026-07-25 | real (`latest`) — BQ migrate/init: Dataform-parity auth (generated secretless ADC creds; interactive auth step) + scaffolded test environment (run --environment test before production) |
+| both | `1.26.0` | 2026-07-25 | real — BQ migrate/init: Dataform-parity auth (generated secretless ADC creds; interactive auth step) + scaffolded test environment (run --environment test before production) |
 
 The `0.0.1` rows are the original name-reservation placeholders (source not
 committed — one-shot scaffolding under `~/sqlanvil-npm-placeholders/` on Ivan's
 Mac); they were superseded by the first real `1.x` publish. The current
-published version of both packages is **`1.26.0`** (`latest`).
+published version of both packages is **`1.26.1`** (`latest`).
 
 > **Gotcha (learned on 1.25.0, FIXED at source):** npm ≥11 rejects tarballs
 > containing a bare `package/` directory entry with `E415 … invalid path:
