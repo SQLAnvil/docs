@@ -74,12 +74,13 @@ Free plan is sufficient — sqlanvil is OSS, no private packages needed.
 | both | `1.26.1` | 2026-07-25 | real — migrate generates scripts/introspect_all.sh (every concrete introspect command) |
 | both | `1.26.2` | 2026-07-26 | real — introspect: BigQuery connections fall back to ADC (no .df-credentials.json required) |
 | both | `1.27.0` | 2026-07-26 | real — declarations inert until referenced (unreferenced runner-extract declarations pruned from graph; Dataform parity) + resilient generated introspect_all.sh (collect failures, summarize) |
-| both | `1.27.1` | 2026-07-27 | real (`latest`) — runner-extract hardening: NUMERIC coercion (Big→text), streaming batched loads (bounded memory), extract concurrency cap 4 + single-conn loader, pg client listener-leak fix |
+| both | `1.27.1` | 2026-07-27 | real — runner-extract hardening: NUMERIC coercion (Big→text), streaming batched loads (bounded memory), extract concurrency cap 4 + single-conn loader, pg client listener-leak fix |
+| both | `1.27.2` | 2026-07-27 | real (`latest`) — stdio flush before exit (piped output >64KB truncated — broke hosted run-detail capture) + BigInt-safe query/inspect --json |
 
 The `0.0.1` rows are the original name-reservation placeholders (source not
 committed — one-shot scaffolding under `~/sqlanvil-npm-placeholders/` on Ivan's
 Mac); they were superseded by the first real `1.x` publish. The current
-published version of both packages is **`1.27.1`** (`latest`).
+published version of both packages is **`1.27.2`** (`latest`).
 
 > **Gotcha (learned on 1.25.0, FIXED at source):** npm ≥11 rejects tarballs
 > containing a bare `package/` directory entry with `E415 … invalid path:
