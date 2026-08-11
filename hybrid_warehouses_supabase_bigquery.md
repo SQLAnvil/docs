@@ -10,7 +10,7 @@ This document outlines how **SQLAnvil** supports both **PostgreSQL (Supabase)** 
 
 ## 1. Multi-Warehouse Coexistence in SqlAnvil
 
-SqlAnvil is architected around a unified interface, the **`IDbAdapter`** (defined in [cli/api/dbadapters/index.ts](file:///Users/ivan/projects-ivan/sqlanvil/cli/api/dbadapters/index.ts)). This design allows multiple database clients to coexist in the codebase without conflict.
+SqlAnvil is architected around a unified interface, the **`IDbAdapter`** (defined in [cli/api/dbadapters/index.ts](file:///Users/ivan/projects-ivan/sqlanvil/sqlanvil/cli/api/dbadapters/index.ts)). This design allows multiple database clients to coexist in the codebase without conflict.
 
 ```
        [ SqlAnvil CLI / Core Engine ]

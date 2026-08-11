@@ -121,7 +121,7 @@ install it locally — it's the identical artifact you'd publish, with zero
 registry impact:
 
 ```bash
-cd ~/projects-ivan/sqlanvil
+cd ~/projects-ivan/sqlanvil/sqlanvil
 ./scripts/docker-bazel build //packages/@sqlanvil/cli:package_tar \
                              //packages/@sqlanvil/core:package_tar \
                              --jobs=2 --local_ram_resources=2048
@@ -143,7 +143,7 @@ be on npm — publish a beta (§3.4), never the real version, for testing.
 **As of 2026-07-01, native macOS Bazel works again** — build directly:
 
 ```bash
-cd ~/projects-ivan/sqlanvil
+cd ~/projects-ivan/sqlanvil/sqlanvil
 bazel build //packages/@sqlanvil/cli:package_tar //packages/@sqlanvil/core:package_tar
 # Output: bazel-bin/packages/@sqlanvil/{cli,core}/package.tar.gz (real path, cp-able from the host)
 ```
@@ -155,7 +155,7 @@ The old `wrapped_clang`/dyld `LC_UUID` protobuf-C++ breakage self-resolved via a
 again on a future macOS:
 
 ```bash
-cd ~/projects-ivan/sqlanvil
+cd ~/projects-ivan/sqlanvil/sqlanvil
 ./scripts/docker-bazel build //packages/@sqlanvil/cli:package_tar \
                              --jobs=2 --local_ram_resources=2048
 # Output: bazel-bin/packages/@sqlanvil/cli/package.tar.gz
@@ -219,7 +219,7 @@ was forgotten on 1.8.2 AND 1.13.0** (GitHub kept showing the prior version until
 noticed), so it's automated:
 
 ```bash
-cd ~/projects-ivan/sqlanvil
+cd ~/projects-ivan/sqlanvil/sqlanvil
 ./scripts/release_github            # releases the version in version.bzl
 # DRY_RUN=1 ./scripts/release_github   # preview first (touches nothing)
 ```
@@ -257,7 +257,7 @@ All of these move together with the version bump — none are optional:
    changed (`regenerate_docs`).
 2. **Engine `AGENTS.md`** — version pins + new deltas (contributor-facing canonical).
 3. **`SQLAnvil/agent-skills`** (public repo, local checkout
-   `~/projects-ivan/sqlanvil-agent-skills`) —
+   `~/projects-ivan/sqlanvil/agent-skills`) —
    `skills/sqlanvil-engineering-fundamentals/SKILL.md` version pins + new deltas.
    This is the **public canonical** skill (`npx skills add SQLAnvil/agent-skills`);
    the old personal claude-skills copy is a retired stub. Content-review against

@@ -13,7 +13,7 @@ by pre-existing upstream toolchain rot (separate from the rename — see
 ## Where to pick up
 
 ```bash
-cd ~/projects-ivan/sqlanvil
+cd ~/projects-ivan/sqlanvil/sqlanvil
 git checkout rename/dataform-to-sqlanvil
 git log --oneline restore-postgres-adapter..HEAD     # see the 10 rename commits
 ```

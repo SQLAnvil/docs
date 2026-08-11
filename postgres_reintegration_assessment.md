@@ -32,7 +32,7 @@ graph TD
 ### Phase 1: Dependency Restoration
 Because the modern project uses no other external relational database clients (only BigQuery), the PostgreSQL drivers are completely missing from the lockfile.
 1. **Modify `package.json`**:
-   Add the following dependencies to the root [package.json](file:///Users/ivan/projects-ivan/sqlanvil/package.json):
+   Add the following dependencies to the root [package.json](file:///Users/ivan/projects-ivan/sqlanvil/sqlanvil/package.json):
    ```json
    "dependencies": {
      "pg": "^8.11.3",
@@ -60,7 +60,7 @@ The restored files are in the outdated `api/` directory and need to be relocated
    * Replace the `collectEvaluationQueries` import from `df/core/adapters` with `df/cli/api/dbadapters/execution_sql`.
 
 ### Phase 3: Interface Alignment
-The restored `PostgresDbAdapter` must implement the modern `IDbAdapter` interface defined in [cli/api/dbadapters/index.ts](file:///Users/ivan/projects-ivan/sqlanvil/cli/api/dbadapters/index.ts).
+The restored `PostgresDbAdapter` must implement the modern `IDbAdapter` interface defined in [cli/api/dbadapters/index.ts](file:///Users/ivan/projects-ivan/sqlanvil/sqlanvil/cli/api/dbadapters/index.ts).
 1. **Implement `executeRaw`**:
    Add the `executeRaw` method to the Postgres adapter. Since PostgreSQL query results do not need complex nested unboxing (unlike BigQuery), it can directly map to `execute()`:
    ```typescript
@@ -96,7 +96,7 @@ The restored `PostgresDbAdapter` must implement the modern `IDbAdapter` interfac
 1. **Register in Bazel BUILD Rules**:
    Update `cli/api/BUILD` to include `postgres.ts` and `utils/postgres.ts` under the appropriate library targets.
 2. **Wire in `cli/index.ts`**:
-   Currently, the CLI in [cli/index.ts](file:///Users/ivan/projects-ivan/sqlanvil/cli/index.ts) explicitly creates a `BigQueryDbAdapter` on lines 349, 535, and 614.
+   Currently, the CLI in [cli/index.ts](file:///Users/ivan/projects-ivan/sqlanvil/sqlanvil/cli/index.ts) explicitly creates a `BigQueryDbAdapter` on lines 349, 535, and 614.
    * Modify the instantiation logic to check the configured warehouse in the project's `dataform.json`:
      ```typescript
      let dbadapter: IDbAdapter;
