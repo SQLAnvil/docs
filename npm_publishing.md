@@ -77,7 +77,13 @@ Free plan is sufficient — sqlanvil is OSS, no private packages needed.
 | both | `1.27.1` | 2026-07-27 | real — runner-extract hardening: NUMERIC coercion (Big→text), streaming batched loads (bounded memory), extract concurrency cap 4 + single-conn loader, pg client listener-leak fix |
 | both | `1.27.2` | 2026-07-27 | real — stdio flush before exit (piped output >64KB truncated — broke hosted run-detail capture) + BigInt-safe query/inspect --json |
 | both | `1.28.0` | 2026-07-30 | real — migration becomes three phases: new `migrate-fix` command (`* EXCEPT` expansion, `GROUP BY ALL`), argument-aware call rewriting (SAFE_CAST as `pg_input_is_valid` guard, SAFE_DIVIDE, SPLIT, DATE_DIFF, subscripts, types), BigQuery/PG quoting + raw strings + `#` comments + DAYOFWEEK, COLLATE stripping, NOT ENFORCED rewritten-and-commented, ARRAY&lt;STRUCT&gt; per-site strategy + SQL in the report, class-first agent-readable report, extract/introspect fold column names to lower case (**behaviour change**) |
-| both | `1.29.0` | 2026-07-31 | real (`latest`) — upstream sync to dataform 3.0.62 (DF_VERSION 3.0.62): `incrementalStrategy: "insert_overwrite"` on BigQuery (partition replacement, live-verified) + compile error on postgres/supabase/mysql rather than silent fallthrough to merge; `preserveGovernanceControls`; skipped tasks record the reason; 5 proto field numbers renumbered AWAY from upstream's choices to protect stored compiled graphs |
+| both | `1.29.0` | 2026-07-31 | real — upstream sync to dataform 3.0.62 (DF_VERSION 3.0.62): `incrementalStrategy: "insert_overwrite"` on BigQuery (partition replacement, live-verified) + compile error on postgres/supabase/mysql rather than silent fallthrough to merge; `preserveGovernanceControls`; skipped tasks record the reason; 5 proto field numbers renumbered AWAY from upstream's choices to protect stored compiled graphs |
+| both | `1.30.0` | 2026-08-08 | real — `.jitCode()` fails loudly instead of silently doing nothing |
+| both | `1.31.0` | 2026-08-20 | real — `format --ignore-js-files` |
+| both | `1.32.0` | 2026-08-27 | real — `run --execution-timeout` + two small fixes (upstream 3.0.66 sync) |
+| both | `1.32.1` | 2026-09-02 | real — upstream 3.0.67 sync: shared config objects keep `bigquery`/`assertions` across `publish()` (#2260) + our view.ts extension (filed upstream as #2267 → #2273) |
+| both | `1.32.2` | 2026-09-04 | real — upstream 3.0.68 sync: failed `ref()`/`resolve()` errors name the `.sqlx` file, not `index.js` (#2271) |
+| both | `1.32.3` | 2026-09-06 | real (`latest`) — `declare()` no longer mutates the caller's config (database/schema renamed, `columns` replaced with protos); upstream #2280 / #2283 carried ahead of 3.0.69 |
 
 The `0.0.1` rows are the original name-reservation placeholders (source not
 committed — one-shot scaffolding under `~/sqlanvil-npm-placeholders/` on Ivan's
