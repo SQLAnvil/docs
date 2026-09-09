@@ -83,7 +83,8 @@ Free plan is sufficient — sqlanvil is OSS, no private packages needed.
 | both | `1.32.0` | 2026-08-27 | real — `run --execution-timeout` + two small fixes (upstream 3.0.66 sync) |
 | both | `1.32.1` | 2026-09-02 | real — upstream 3.0.67 sync: shared config objects keep `bigquery`/`assertions` across `publish()` (#2260) + our view.ts extension (filed upstream as #2267 → #2273) |
 | both | `1.32.2` | 2026-09-04 | real — upstream 3.0.68 sync: failed `ref()`/`resolve()` errors name the `.sqlx` file, not `index.js` (#2271) |
-| both | `1.32.4` | 2026-09-07 | real (`latest`) — upstream 3.0.69 sync: no engine code change (#2273/#2283 already carried); `--version` reports Dataform core 3.0.69; dev-tree fast-xml-parser 5.7.3 (#2163) |
+| both | `1.32.5` | 2026-09-09 | real (`latest`) — clear error for a non-string `defaultProject`/`defaultDataset` (upstream #1846, unmerged); CLI entry split into `cli/commands/*` (upstream #2286, carried ahead of 3.0.70) — no behaviour change |
+| both | `1.32.4` | 2026-09-07 | real — upstream 3.0.69 sync: no engine code change (#2273/#2283 already carried); `--version` reports Dataform core 3.0.69; dev-tree fast-xml-parser 5.7.3 (#2163) |
 | both | `1.32.3` | 2026-09-06 | real — `declare()` no longer mutates the caller's config (database/schema renamed, `columns` replaced with protos); upstream #2280 / #2283 carried ahead of 3.0.69 |
 
 The `0.0.1` rows are the original name-reservation placeholders (source not
