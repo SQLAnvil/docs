@@ -2,6 +2,9 @@
 
 This guide outlines a highly robust, sandboxed process for pulling, merging, and resolving conflicts when syncing changes from Google's upstream `dataform-co/dataform` releases (such as `3.0.58`) into the **SQLAnvil** codebase.
 
+> **Run every command here from the root of the `SQLAnvil/sqlanvil` engine checkout**, not from
+> this docs repo. Paths like `./scripts/...` refer to that repo.
+
 ---
 
 ## 0. Last Sync & The One Key Principle
@@ -77,6 +80,35 @@ Attempt to merge the targeted release tag (e.g. `3.0.58`) into the sandbox:
 git merge 3.0.58
 ```
 
+### Step 4: Check dependency `resolutions` drift
+Upstream adds **security pins** to the `resolutions` block in `package.json` via Dependabot PRs
+that land on their `main` *between* tagged releases. Because we take upstream selectively rather
+than merging every tag wholesale, these are easy to miss — a one-line change buried in a release
+diff, with nothing about a normal sync drawing attention to it. They are not cosmetic: `yarn.lock`
+is consumed by `yarn_install` in `WORKSPACE`, so whatever it resolves reaches the build.
+
+```bash
+./scripts/check_upstream_resolutions              # vs upstream/main
+./scripts/check_upstream_resolutions 3.0.70       # vs a specific tag
+```
+
+Exit 0 means we cover everything upstream pins. Exit 1 lists what to add. Pins we carry that
+upstream lacks are reported but never fail — we ship adapters (pg, mysql) they do not, so we
+legitimately pin things they never see.
+
+If it reports missing pins, add them to `package.json`, then:
+```bash
+yarn install    # regenerate yarn.lock; expect transitive packages to drop out
+```
+Read the advisory behind each one rather than assuming it is only a version bump, and re-run the
+verification in §4 — a resolution can force a major version on a transitive dep (e.g.
+`brace-expansion` 1.x → 5.x), which yarn will warn about and which only the build can vindicate.
+
+> Found the hard way on 2026-09-19: the fork was three pins behind (`braces`, `brace-expansion`,
+> `linkify-it`), all three resolving versions with advisories. Upstream PR
+> [#2327](https://github.com/dataform-co/dataform/pull/2327) supplied only one of the three; the
+> other two had been sitting upstream for longer. Hence a scripted check rather than an eyeball.
+
 ---
 
 ## 3. Anticipated Conflicts & Resolution Playbook
@@ -124,18 +156,40 @@ import { ActionBuilder } from "sa/core/actions/base";
 
 ## 4. Verification & Clean-Up
 
-Once all conflicts are resolved, run the full validation suite inside your development container. **Native macOS Bazel is broken** (the `wrapped_clang` / dyld `LC_UUID` toolchain error compiling protobuf C++), so all builds/tests go through `scripts/docker-bazel`. Always pass `--jobs=2 --local_ram_resources=2048` — the in-container Bazel JVM gets OOM-killed (`Socket closed`, error 14) under default parallelism during webpack bundling.
+Once all conflicts are resolved, run the full validation suite. **Run these natively** — pass
+`--config=macos-cpp`, which supplies the clang action env the protobuf C++ compile needs.
 
 ```bash
 # 1. Build everything affected — THIS is what catches reintroduced dataform tokens
-./scripts/docker-bazel build //core/... //cli/... //protos/... --jobs=2 --local_ram_resources=2048
+bazel build //core/... //cli/... //protos/... --config=macos-cpp
 
-# 2. Run core compiler tests
-./scripts/docker-bazel test //core/... --jobs=2 --local_ram_resources=2048
+# 2. Run core compiler tests (the authoritative signal; cli e2e suites are flaky)
+bazel test //core/... //cli/... --config=macos-cpp
 
-# 2. Run the newly updated integration tests
-PG_HOST=host.docker.internal PG_PORT=5432 ./scripts/docker-bazel test //tests/integration:postgres.spec --test_env=PG_HOST --test_env=PG_PORT --test_env=PG_USER --test_env=PG_PASSWORD --test_env=PG_DATABASE
+# 3. Run the newly updated integration tests (needs the local Docker DBs up)
+PG_HOST=localhost PG_PORT=5432 bazel test //tests/integration:postgres.spec --config=macos-cpp \
+  --test_env=PG_HOST --test_env=PG_PORT --test_env=PG_USER --test_env=PG_PASSWORD --test_env=PG_DATABASE
 ```
+
+<details>
+<summary>Fallback: <code>scripts/docker-bazel</code></summary>
+
+Native macOS Bazel used to fail with a `wrapped_clang` / dyld `LC_UUID` toolchain error compiling
+protobuf C++, and this guide routed everything through the container as a result. **That is
+resolved** — native with `--config=macos-cpp` is the primary path as of 2026-09-19. The container
+route is kept for when the native toolchain breaks again or you need to reproduce CI exactly.
+
+Always pass `--jobs=2 --local_ram_resources=2048`: the in-container Bazel JVM gets OOM-killed
+(`Socket closed`, error 14) under default parallelism during webpack bundling. Note the integration
+tests need `PG_HOST=host.docker.internal` there rather than `localhost`.
+
+```bash
+./scripts/docker-bazel build //core/... //cli/... //protos/... --jobs=2 --local_ram_resources=2048
+./scripts/docker-bazel test //core/... --jobs=2 --local_ram_resources=2048
+PG_HOST=host.docker.internal PG_PORT=5432 ./scripts/docker-bazel test //tests/integration:postgres.spec \
+  --test_env=PG_HOST --test_env=PG_PORT --test_env=PG_USER --test_env=PG_PASSWORD --test_env=PG_DATABASE
+```
+</details>
 
 If the build completes and all tests pass:
 ```bash
