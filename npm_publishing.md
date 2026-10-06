@@ -281,6 +281,16 @@ All of these move together with the version bump — none are optional:
    Bump `version` in `sqlanvil-toolkit/.claude-plugin/plugin.json` and the matching
    entries in `.claude-plugin/marketplace.json` and `web/src/data/plugins.js`. A new
    skill added to agent-skills also needs a line in the script's `SKILLS` array.
+   Then pull it into your own Claude Code, which loads the skill from the installed
+   plugin (there is no `~/.claude/skills` symlink any more), and restart Claude Code:
+
+   ```bash
+   claude plugin marketplace update ihistand
+   claude plugin update sqlanvil-toolkit@ihistand
+   ```
+
+   The installed copy is cached per version, so the update only finds a change if
+   the plugin's version was bumped above.
 5. **SQLAnvil Cloud** — `SCAFFOLD_CORE_VERSION` in `apps/web/lib/scaffold.ts`,
    runner Dockerfile CLI pin, rebuild + deploy the runner image.
 
