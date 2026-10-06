@@ -274,7 +274,14 @@ All of these move together with the version bump — none are optional:
    This is the **public canonical** skill (`npx skills add SQLAnvil/agent-skills`);
    the old personal claude-skills copy is a retired stub. Content-review against
    the release notes, not a blind copy of AGENTS.md (different scopes). Commit + push.
-4. **SQLAnvil Cloud** — `SCAFFOLD_CORE_VERSION` in `apps/web/lib/scaffold.ts`,
+4. **`ihistand/claude-plugins`** (local checkout `~/projects-ivan/claude-plugins`) —
+   after step 3 is pushed, run `./scripts/sync-skills.sh`, then commit + push. The
+   `sqlanvil-toolkit` plugin ships *copies* of the agent-skills skills; skip this and
+   the plugin silently falls behind (it had drifted from core 1.2 to 1.32.9 by 2026-10-04).
+   Bump `version` in `sqlanvil-toolkit/.claude-plugin/plugin.json` and the matching
+   entries in `.claude-plugin/marketplace.json` and `web/src/data/plugins.js`. A new
+   skill added to agent-skills also needs a line in the script's `SKILLS` array.
+5. **SQLAnvil Cloud** — `SCAFFOLD_CORE_VERSION` in `apps/web/lib/scaffold.ts`,
    runner Dockerfile CLI pin, rebuild + deploy the runner image.
 
 ## 4. Version Policy
