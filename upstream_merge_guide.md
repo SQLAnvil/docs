@@ -15,9 +15,11 @@ the per-commit TAKEN / NOT TAKEN record for every release since 3.0.64 lives in 
 was taken. Since 3.0.64 syncs are *selective*: each upstream commit is reviewed and taken,
 adapted, deferred or declined on its own, rather than `git merge`d wholesale (§2 Step 3 still
 describes the wholesale merge; use it only when a release is small and clean). Standing
-deferrals as of 3.1.0: **#2352 Bazel toolchain rewrite** (rules_js + pnpm; its own change, not a
-sync), **#2310 vm2 → node:vm** (not a security boundary; Cloud-runner prerequisites open),
-**#2297 tslint → eslint**. Standing declines: lineage, PropertyGraph, JiT runtime.
+deferrals as of 3.1.0: **#2310 vm2 → node:vm** (not a security boundary; Cloud-runner
+prerequisites open). The **#2352 Bazel toolchain rewrite** (rules_js + pnpm, TypeScript 5.5) and
+**#2297 tslint → eslint** were taken on 2026-10-15 as their own change (engine `65341c8d`), so the
+build now matches upstream's layout: `//:node_modules/<pkg>` deps, `pnpm-lock.yaml`,
+`js_test` suites. Standing declines: lineage, PropertyGraph, JiT runtime.
 
 Earlier wholesale sync: upstream **`3.0.61`** → `main` on 2026-07-02 (merge commit `e12ee80f`). That sync also
 adopted the **bzlmod migration** (upstream #2187, issue #41): Bazel **5.4.0 → 7.3.2**, new `MODULE.bazel` +
@@ -168,9 +170,11 @@ import { ActionBuilder } from "sa/core/actions/base";
   points at Xcode.app while Bazel's cached C++ toolchain was configured against the Command Line
   Tools. Add `--action_env=DEVELOPER_DIR=/Library/Developer/CommandLineTools
   --host_action_env=DEVELOPER_DIR=/Library/Developer/CommandLineTools`; don't touch xcode-select.
-- **Upstream is pnpm now.** `pnpm-lock.yaml` hunks never apply to `yarn.lock`; lift the resolved
-  versions by hand and regenerate with `npx --yes yarn@1.22.22 install --ignore-scripts` (there
-  is no system yarn). Lockfile-only upstream commits are invisible to a diff of `package.json`.
+- **Both sides are pnpm now** (ours since `65341c8d`). Upstream `pnpm-lock.yaml` hunks still
+  rarely apply verbatim because our dependency set is larger; take the `package.json` change and
+  regenerate with `bazel run -- @pnpm//:pnpm --dir "$PWD" install` (never a global pnpm — the
+  version must match `MODULE.bazel`). Lockfile-only upstream commits are invisible to a diff of
+  `package.json`; `scripts/check_upstream_resolutions` covers the `pnpm.overrides` pins.
 
 ### F. Specific landmines seen in the 3.0.59 sync
 - **Caller-file global:** the exposed sandbox global must stay `__sqlanvil_current_file` (read by `core/utils.ts`); rename upstream's `__dataform_current_file` to it. `__df_enter/__df_exit/__df_current` are internal helper names — fine to leave.

@@ -161,8 +161,14 @@ be on npm — publish a beta (§3.4), never the real version, for testing.
 ```bash
 cd ~/projects-ivan/sqlanvil/sqlanvil
 bazel build //packages/@sqlanvil/cli:package_tar //packages/@sqlanvil/core:package_tar
-# Output: bazel-bin/packages/@sqlanvil/{cli,core}/package.tar.gz (real path, cp-able from the host)
+# Output: bazel-bin/packages/@sqlanvil/{cli,core}/package.tar.gz (real path, cp-able from the host;
+# the outputs are read-only, so `rm -f` a previous copy before `cp`-ing over it)
 ```
+
+Since the rules_js toolchain (2026-10-15) each package also has a `:package.publish` target
+(`bazel run //packages/@sqlanvil/core:package.publish -- --tag=latest`) that runs `npm publish`
+on the built package directory. It needs the same `npm login` as a manual publish; the tarball
+route above stays the documented one because it is what gets inspected (§3.3) before publishing.
 
 The old `wrapped_clang`/dyld `LC_UUID` protobuf-C++ breakage self-resolved via a macOS/CLT update
 (`.bazelversion` is unchanged at 5.4.0). Verified with a forced `--compilation_mode=opt` recompile.
