@@ -98,7 +98,7 @@ Free plan is sufficient — sqlanvil is OSS, no private packages needed.
 The `0.0.1` rows are the original name-reservation placeholders (source not
 committed — one-shot scaffolding under `~/sqlanvil-npm-placeholders/` on Ivan's
 Mac); they were superseded by the first real `1.x` publish. The current
-published version of both packages is **`1.29.0`** (`latest`).
+published version of both packages is **`1.34.0`** (`latest`, 2026-10-15).
 
 > **Gotcha (learned on 1.25.0, FIXED at source):** npm ≥11 rejects tarballs
 > containing a bare `package/` directory entry with `E415 … invalid path:
@@ -214,7 +214,7 @@ tar xzf sqlanvil-cli.tgz -C /tmp/inspect && cat /tmp/inspect/package/package.jso
 ### 3.4. Publish
 
 ```bash
-npm login                                  # 2FA device-auth flow (see §6)
+npm login                                  # REQUIRED before EVERY publish session (see §6)
 
 # Real release (version == SQLANVIL_VERSION, e.g. 1.0.0):
 npm publish ./sqlanvil-cli.tgz --access public
@@ -360,6 +360,12 @@ Token setup: npm → Profile → Access Tokens → Generate (Granular, scoped to
 
 ## 6. Auth Notes
 
+- **`npm login` is a required step before every publish session (since 2026-10).** npm no
+  longer keeps the login for long, so a publish run that skips `npm login` fails quietly
+  from the publisher's point of view — on 1.34.0 the first attempt left the registry untouched
+  (both packages still at 1.33.1, `time.modified` unchanged) until the publish was redone after
+  a fresh login. Verify with `npm view @sqlanvil/core@X.Y.Z version` afterwards; `npm view`
+  can lag a few minutes, and core often shows up later than cli.
 - 2FA is enabled by default for new npm accounts. Each `npm publish` from a
   CLI triggers a browser device-auth flow.
 - For automation, use **granular access tokens** (npm Profile → Access Tokens
