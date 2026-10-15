@@ -9,7 +9,17 @@ This guide outlines a highly robust, sandboxed process for pulling, merging, and
 
 ## 0. Last Sync & The One Key Principle
 
-**Last synced:** upstream **`3.0.61`** → `main` on 2026-07-02 (merge commit `e12ee80f`). This sync also
+**Last synced:** upstream **`3.1.0`** → `main` on 2026-10-15 (commit `e6bd23ce`), reviewed selectively —
+the per-commit TAKEN / NOT TAKEN record for every release since 3.0.64 lives in the engine's
+`version.bzl` above `DF_VERSION`, and that ledger, not this paragraph, is the authority on what
+was taken. Since 3.0.64 syncs are *selective*: each upstream commit is reviewed and taken,
+adapted, deferred or declined on its own, rather than `git merge`d wholesale (§2 Step 3 still
+describes the wholesale merge; use it only when a release is small and clean). Standing
+deferrals as of 3.1.0: **#2352 Bazel toolchain rewrite** (rules_js + pnpm; its own change, not a
+sync), **#2310 vm2 → node:vm** (not a security boundary; Cloud-runner prerequisites open),
+**#2297 tslint → eslint**. Standing declines: lineage, PropertyGraph, JiT runtime.
+
+Earlier wholesale sync: upstream **`3.0.61`** → `main` on 2026-07-02 (merge commit `e12ee80f`). That sync also
 adopted the **bzlmod migration** (upstream #2187, issue #41): Bazel **5.4.0 → 7.3.2**, new `MODULE.bazel` +
 `MODULE.bazel.lock`, `WORKSPACE` trimmed to just `build_bazel_rules_nodejs`. All the `df`/`_main` workspace-name
 references were adapted to **`sa`** (`MODULE.bazel` `module(name)`, `tools/ts_library.bzl` `module_name`,
@@ -81,8 +91,10 @@ git merge 3.0.58
 ```
 
 ### Step 4: Check dependency `resolutions` drift
-Upstream adds **security pins** to the `resolutions` block in `package.json` via Dependabot PRs
-that land on their `main` *between* tagged releases. Because we take upstream selectively rather
+Upstream adds **security pins** to `package.json` via Dependabot PRs that land on their `main`
+*between* tagged releases — in `resolutions` up to 3.0.71 and in **`pnpm.overrides`** from 3.1.0
+(#2352 moved them to pnpm; the script reads both blocks and normalizes the key syntaxes, and it
+compares the *committed* `package.json` at `HEAD`, so run it again after committing your pins). Because we take upstream selectively rather
 than merging every tag wholesale, these are easy to miss — a one-line change buried in a release
 diff, with nothing about a normal sync drawing attention to it. They are not cosmetic: `yarn.lock`
 is consumed by `yarn_install` in `WORKSPACE`, so whatever it resolves reaches the build.
@@ -145,7 +157,22 @@ import { ActionBuilder } from "sa/core/actions/base";
     `./scripts/docker-bazel build //core/... //cli/... //protos/... --jobs=2 --local_ram_resources=2048`
   - When upstream **rewrote a whole file's apparatus** (e.g. `cli/vm/compile.ts` caller-file machinery in 3.0.59), don't resolve hunk-by-hunk — `git checkout --theirs <file>`, then re-apply the rename. Piecemeal resolution leaves auto-merged code referencing variables only the upstream side defines (e.g. `coreBundlePath`, `needsCallerFileShim`).
 
-### E. Specific landmines seen in the 3.0.59 sync
+### E. Landmines seen in the 3.1.0 sync
+- **Case-insensitive file systems:** upstream tests that `mkdir` two names differing only by case
+  (`Proj` / `proj`, from #2350) pass on their Linux CI and fail with `EEXIST` on APFS. Port them
+  with an `fs.existsSync` early return rather than deleting them.
+- **The compiled graph is `/`-separated on every platform** since #2350. Anything that matches a
+  compiled `fileName` against an editor or OS path (the VS Code extension did, with
+  `path.win32.normalize`) must convert to forward slashes first.
+- **`absolute path inclusion(s) found in rule '@@zlib~//:z'`** on `//protos/...`: `xcode-select`
+  points at Xcode.app while Bazel's cached C++ toolchain was configured against the Command Line
+  Tools. Add `--action_env=DEVELOPER_DIR=/Library/Developer/CommandLineTools
+  --host_action_env=DEVELOPER_DIR=/Library/Developer/CommandLineTools`; don't touch xcode-select.
+- **Upstream is pnpm now.** `pnpm-lock.yaml` hunks never apply to `yarn.lock`; lift the resolved
+  versions by hand and regenerate with `npx --yes yarn@1.22.22 install --ignore-scripts` (there
+  is no system yarn). Lockfile-only upstream commits are invisible to a diff of `package.json`.
+
+### F. Specific landmines seen in the 3.0.59 sync
 - **Caller-file global:** the exposed sandbox global must stay `__sqlanvil_current_file` (read by `core/utils.ts`); rename upstream's `__dataform_current_file` to it. `__df_enter/__df_exit/__df_current` are internal helper names — fine to leave.
 - **`dataform.json` clean break:** never reintroduce the `hasDataformJson` / `global.dataformJson` handling upstream adds — SQLAnvil reads only `workflow_settings.yaml`.
 - **Extracted helpers:** when upstream moves logic into helpers (e.g. `executionSql.createTableTasks/Operation/Assertion`), the rename must follow into the auto-merged helper bodies; prior SQLAnvil behavior (e.g. `disabled`-action handling) is usually preserved *inside* them — verify rather than re-add.
@@ -161,6 +188,7 @@ Once all conflicts are resolved, run the full validation suite. **Run these nati
 
 ```bash
 # 1. Build everything affected — THIS is what catches reintroduced dataform tokens
+#    (add the DEVELOPER_DIR pair from §3.E if //protos/... fails on "absolute path inclusion")
 bazel build //core/... //cli/... //protos/... --config=macos-cpp
 
 # 2. Run core compiler tests (the authoritative signal; cli e2e suites are flaky)
