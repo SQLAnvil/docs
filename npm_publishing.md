@@ -86,6 +86,7 @@ Free plan is sufficient — sqlanvil is OSS, no private packages needed.
 | both | `1.32.9` | 2026-09-26 | real — upstream sync to dataform 3.0.71: backslashes in SQL comments no longer break the file (#2339); CLI `parse-duration` 2.1.6 for GHSA-hcrg-fc28-fcg5 (#2332), ESM-only, so the CLI now needs **Node 20.19+ / 22.12+** (declared in `engines`) |
 | both | `1.32.10` | 2026-10-09 | real — `run --job-prefix` registered (read but never declared since upstream #1449, so strict mode rejected it); corrected `--database-suffix` / `validate` help; the cli package README is now the CLI reference (`cli/README.md`, upstream #2364). DF stays 3.0.71 |
 | both | `1.33.0` | 2026-10-10 | real (`latest`) — the table-level `supabase: {}` block is applied (it was stored but never turned into SQL); `rlsPolicy`/`realtimePublication`/`vectorIndex` load from `actions.yaml`, missing required fields are compile errors; enum names (pg index method + partition kind, mysql partition kind, vector indexType) converted instead of silently becoming the first value; prettier 3 reformat (upstream #2315/#2342, no behavior change). DF stays 3.0.71 |
+| both | `1.35.0` | 2026-10-15 | real (`latest`) — projects compile in Node's `node:vm` via `common/vm/VmRunner` (upstream #2310; NOT a security sandbox — project code runs with the CLI's privileges; `require` confined to the project dir, empty `process.env`); vm2 dropped from the CLI's dependencies; build moved to rules_js + pnpm (upstream #2352, TS 5.5, eslint only). DF stays 3.1.0 |
 | both | `1.34.0` | 2026-10-15 | real (`latest`) — Windows support (upstream #2350, adapted): compiled `fileName`s are `/`-separated on every platform, compile worker `spawn EINVAL` fixed, `format --check` accepts CRLF, `"` in a `.sqlx` name no longer breaks the action; `compile --watch` on chokidar 4; vm2 3.12.2; upstream sync to Dataform **3.1.0** (`DF_VERSION` 3.0.71 → 3.1.0; #2352 pnpm/rules_js toolchain rewrite and #2310 node:vm deferred, see `version.bzl`) |
 | both | `1.33.1` | 2026-10-14 | real (`latest`) — fixed CLI/core compatibility floor (upstream #2376, adapted): the CLI accepts any `@sqlanvil/core` >=1.0.0 with the same major, so a newer CLI runs projects pinned to an older core (1.33.0 refused `sqlanvilCoreVersion: 1.32.10`); clearer incompatibility error; pre-3.0.57 caller-file bundle patch removed (dead on our line). DF stays 3.0.71 |
 | both | `1.32.8` | 2026-09-22 | real — `onSchemaChange` FAIL/EXTEND/SYNCHRONIZE works on BigQuery again (upstream #2319, carried ahead of 3.0.71) |
@@ -98,7 +99,7 @@ Free plan is sufficient — sqlanvil is OSS, no private packages needed.
 The `0.0.1` rows are the original name-reservation placeholders (source not
 committed — one-shot scaffolding under `~/sqlanvil-npm-placeholders/` on Ivan's
 Mac); they were superseded by the first real `1.x` publish. The current
-published version of both packages is **`1.34.0`** (`latest`, 2026-10-15).
+published version of both packages is **`1.35.0`** (`latest`, 2026-10-15).
 
 > **Gotcha (learned on 1.25.0, FIXED at source):** npm ≥11 rejects tarballs
 > containing a bare `package/` directory entry with `E415 … invalid path:
