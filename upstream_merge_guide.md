@@ -14,12 +14,14 @@ the per-commit TAKEN / NOT TAKEN record for every release since 3.0.64 lives in 
 `version.bzl` above `DF_VERSION`, and that ledger, not this paragraph, is the authority on what
 was taken. Since 3.0.64 syncs are *selective*: each upstream commit is reviewed and taken,
 adapted, deferred or declined on its own, rather than `git merge`d wholesale (§2 Step 3 still
-describes the wholesale merge; use it only when a release is small and clean). Standing
-deferrals as of 3.1.0: **#2310 vm2 → node:vm** (not a security boundary; Cloud-runner
-prerequisites open). The **#2352 Bazel toolchain rewrite** (rules_js + pnpm, TypeScript 5.5) and
-**#2297 tslint → eslint** were taken on 2026-10-15 as their own change (engine `65341c8d`), so the
-build now matches upstream's layout: `//:node_modules/<pkg>` deps, `pnpm-lock.yaml`,
-`js_test` suites. Standing declines: lineage, PropertyGraph, JiT runtime.
+describes the wholesale merge; use it only when a release is small and clean). No standing
+deferrals remain as of 3.1.0: the **#2352 Bazel toolchain rewrite** (rules_js + pnpm, TypeScript
+5.5) with **#2297 tslint → eslint** landed as `65341c8d`, and **#2310 vm2 → node:vm** as
+`e979a574` (both 2026-10-15), so the build and the compile sandbox now match upstream's layout:
+`//:node_modules/<pkg>` deps, `pnpm-lock.yaml`, `js_test` suites, `common/vm/VmRunner`. node:vm is
+not a security boundary (a probe reaches the host `process`; see the `version.bzl` note) — the
+Cloud runner's per-tenant isolation is tracked in `sqlanvil-cloud`. Standing declines: lineage,
+PropertyGraph, JiT runtime.
 
 Earlier wholesale sync: upstream **`3.0.61`** → `main` on 2026-07-02 (merge commit `e12ee80f`). That sync also
 adopted the **bzlmod migration** (upstream #2187, issue #41): Bazel **5.4.0 → 7.3.2**, new `MODULE.bazel` +
