@@ -21,7 +21,10 @@ deferrals remain as of 3.1.0: the **#2352 Bazel toolchain rewrite** (rules_js + 
 `//:node_modules/<pkg>` deps, `pnpm-lock.yaml`, `js_test` suites, `common/vm/VmRunner`. node:vm is
 not a security boundary (a probe reaches the host `process`; see the `version.bzl` note) — the
 Cloud runner's per-tenant isolation is tracked in `sqlanvil-cloud`. Standing declines: lineage,
-PropertyGraph, JiT runtime.
+PropertyGraph, JiT runtime. Post-3.1.0 upstream commits are reviewed singly as they land and
+recorded in the same ledger — e.g. **#2362 BigQuery `impersonateServiceAccount`** (taken 2026-10-16,
+proto field **6** here because upstream's 5 is our `access_token`; see the field comment in
+`protos/profiles.proto` before resolving any conflict there).
 
 Earlier wholesale sync: upstream **`3.0.61`** → `main` on 2026-07-02 (merge commit `e12ee80f`). That sync also
 adopted the **bzlmod migration** (upstream #2187, issue #41): Bazel **5.4.0 → 7.3.2**, new `MODULE.bazel` +
