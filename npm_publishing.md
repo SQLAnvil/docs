@@ -237,6 +237,21 @@ npm publish ./sqlanvil-cli.tgz --access public --tag beta
 `npm i @sqlanvil/cli` users never receive it; testers opt in with
 `npm i @sqlanvil/cli@beta`. Publish `core` first, then `cli`.
 
+**Do not publish `cli` until `core` is listed on the registry.** A 202 from `npm publish` is
+not proof: on 1.36.1 npm accepted core (202, `+ @sqlanvil/core@1.36.1`) but left it "staged"
+with nothing in `npm stage list` to approve or reject, and re-publishing failed with
+`E409 Cannot publish over previously staged version` (npm/cli#9889). cli 1.36.1 went live
+alone, the version number was burned, and both packages had to be re-released as 1.36.2.
+After the core publish, wait until this prints the new version (a few minutes is normal;
+"Your package is being processed" means it is not live yet), then publish cli:
+
+```bash
+npm view @sqlanvil/core@X.Y.Z version --prefer-online
+```
+
+If it never appears, check `npx npm@latest stage list` (npm ≥11.15 has `npm stage`); an empty
+list plus E409 means the version is lost — bump to the next patch and publish both.
+
 ### 3.5. Tag + GitHub release (real releases only) — **use the script**
 
 npm is the primary channel, but the GitHub **Releases** page is the human-facing
