@@ -94,6 +94,8 @@ Free plan is sufficient — sqlanvil is OSS, no private packages needed.
 | both | `1.37.0` | 2026-10-27 | real (`latest`) — migrate-dataform marks + reports the BigQuery no rule handles (bigquery_residue.ts; changes-meaning: REGEXP_REPLACE w/o 'g', CONCAT/GREATEST/LEAST over NULLs, LOG, EXTRACT(WEEK); decisions: BQML, JS UDFs, FARM_FINGERPRINT, INFORMATION_SCHEMA); introspect maps STRUCT → jsonb and REPEATED → arrays, extract loads them; top-level-only config keys; JS `.split()` left alone; js-beautify 2.0.3 (no deprecated-glob install warning). DF 3.1.2 |
 | both | `1.37.1` | 2026-10-27 | real — migrate-dataform scans SQL built in JS template literals (js blocks, .js files, `${…}`) for residual BigQuery; per-line and call rules skip SQL + JS comments; `'''…'''` (and `"""…"""`) → `$sa$…$sa$` before any rule, raw kept, escapes decoded; introspect maps RANGE<DATE/DATETIME/TIMESTAMP> → daterange/tsrange/tstzrange, extract loads ranges. DF 3.1.2 |
 | both | `1.37.2` | 2026-11-02 | real (`latest`) — upstream Dataform 3.1.3 sync: compile makes its temp project copy only for pinned `sqlanvilCoreVersion` projects and removes it on every path (package.json projects leaked an empty temp dir per compile; failed install/compile leaked the copy); `Failed to install @sqlanvil/core@X`; markdown-it 14.3.3 (build-only). #2413 op concatenation declined, #2344 job labels deferred. DF 3.1.3 |
+| both | `1.37.3` | 2026-11-06 | real — upstream Dataform 3.1.4 sync: a pinned compile's temp project copy skips what the root `.gitignore` excludes (#2272), plus the optional `.sqlanvilignore` to bring files back or exclude more; a failed temp-copy removal no longer fails the compile. #2408 dataset-in-first-query deferred. DF 3.1.4 |
+| both | `1.38.0` | 2026-11-12 | real (`latest`) — upstream Dataform 3.1.5 sync. **Breaking:** `run --json` prints the run result (a `RunResult`; exit 1 on failure — it used to print the graph and exit 0), and the old output moves to `run --build-only --json` (#2418). BigQuery `defaultLocation` / credentials `location` optional (#2402, #2421); `run` warns when a script with `SET @@dataset_id` has no location; CLI README tables generated (#2419, adapted). Core tarball carries 11 macOS `._*` AppleDouble files (harmless; see gotcha). DF 3.1.5 |
 | both | `1.35.0` | 2026-10-15 | real (`latest`) — projects compile in Node's `node:vm` via `common/vm/VmRunner` (upstream #2310; NOT a security sandbox — project code runs with the CLI's privileges; `require` confined to the project dir, empty `process.env`); vm2 dropped from the CLI's dependencies; build moved to rules_js + pnpm (upstream #2352, TS 5.5, eslint only). DF stays 3.1.0 |
 | both | `1.34.0` | 2026-10-15 | real (`latest`) — Windows support (upstream #2350, adapted): compiled `fileName`s are `/`-separated on every platform, compile worker `spawn EINVAL` fixed, `format --check` accepts CRLF, `"` in a `.sqlx` name no longer breaks the action; `compile --watch` on chokidar 4; vm2 3.12.2; upstream sync to Dataform **3.1.0** (`DF_VERSION` 3.0.71 → 3.1.0; #2352 pnpm/rules_js toolchain rewrite and #2310 node:vm deferred, see `version.bzl`) |
 | both | `1.33.1` | 2026-10-14 | real (`latest`) — fixed CLI/core compatibility floor (upstream #2376, adapted): the CLI accepts any `@sqlanvil/core` >=1.0.0 with the same major, so a newer CLI runs projects pinned to an older core (1.33.0 refused `sqlanvilCoreVersion: 1.32.10`); clearer incompatibility error; pre-3.0.57 caller-file bundle patch removed (dead on our line). DF stays 3.0.71 |
@@ -107,7 +109,21 @@ Free plan is sufficient — sqlanvil is OSS, no private packages needed.
 The `0.0.1` rows are the original name-reservation placeholders (source not
 committed — one-shot scaffolding under `~/sqlanvil-npm-placeholders/` on Ivan's
 Mac); they were superseded by the first real `1.x` publish. The current
-published version of both packages is **`1.37.2`** (`latest`, 2026-11-02).
+published version of both packages is **`1.38.0`** (`latest`, 2026-11-12).
+
+> **Gotcha (learned on 1.38.0, FIXED at source):** macOS `tar` stores each file's extended
+> attributes (`com.apple.provenance`, set on every file a native macOS Bazel build writes) as a
+> hidden `package/._<file>` AppleDouble entry, and npm publishes it: core 1.38.0 shipped 22 files
+> instead of 11 (harmless — nothing reads them). macOS `tar tzf` **hides** these entries, so the
+> §3.3 listing looks clean. The `pkg_npm_tar` genrule now sets `COPYFILE_DISABLE=1`. Count
+> entries with Python instead, which shows them:
+>
+> ```bash
+> python3 -c "import tarfile,sys; n=tarfile.open(sys.argv[1]).getnames(); print(len(n), [x for x in n if '/._' in x])" sqlanvil-core.tgz
+> ```
+>
+> Expect 11 entries for core, 6 for cli, and an empty list. To repack an affected tarball:
+> `COPYFILE_DISABLE=1 tar -czf out.tgz $(find package -type f | sort)` from the extracted dir.
 
 > **Gotcha (learned on 1.25.0, FIXED at source):** npm ≥11 rejects tarballs
 > containing a bare `package/` directory entry with `E415 … invalid path:
