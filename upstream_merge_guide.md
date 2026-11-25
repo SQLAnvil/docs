@@ -9,7 +9,9 @@ This guide outlines a highly robust, sandboxed process for pulling, merging, and
 
 ## 0. Last Sync & The One Key Principle
 
-**Last synced:** upstream **`3.1.0`** → `main` on 2026-10-15 (commit `e6bd23ce`), reviewed selectively —
+**Last synced:** upstream **`3.1.8`** → `main` on 2026-11-24 (3.1.6, 3.1.7 and 3.1.8 together, tracked in
+SQLAnvil/sqlanvil#67). Since 3.1.0 each release has been reviewed the same way. The 3.1.0 sync (2026-10-15,
+commit `e6bd23ce`) was also reviewed selectively —
 the per-commit TAKEN / NOT TAKEN record for every release since 3.0.64 lives in the engine's
 `version.bzl` above `DF_VERSION`, and that ledger, not this paragraph, is the authority on what
 was taken. Since 3.0.64 syncs are *selective*: each upstream commit is reviewed and taken,
@@ -251,3 +253,4 @@ If not, keep ours and re-apply over the merge.
 | File | Local fix | Upstream issue / PR | Status |
 | :--- | :--- | :--- | :--- |
 | `common/flags/index.ts` | Lenient arg parser — ignore non-flag tokens instead of throwing `Arg neither flag name nor flag value` (which crashed the CLI when a positional followed a flag). Extracted `parseArgvFlags()` + test. | issue [dataform-co/dataform#2198](https://github.com/dataform-co/dataform/issues/2198) → fixed by PR [#2199](https://github.com/dataform-co/dataform/pull/2199) | PR open, not merged (not on `main`, not tagged) — watch #2199 for the convergence trigger |
+| `core/compilation_sql/index.ts` (`sqlString`) | Escape `\n`/`\r` in the `failing_row_condition` literal so multiline `rowConditions` compile on BigQuery (#42). | PR [#2226](https://github.com/dataform-co/dataform/pull/2226) → adopted in [#2424](https://github.com/dataform-co/dataform/pull/2424) (3.1.7) | **Converged** 2026-11-24 (#67): our warehouse-aware `sqlString` already matched it; #2424's extra fixes taken on top |
